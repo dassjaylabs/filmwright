@@ -1,7 +1,12 @@
 mode: both
 title: filmwright in thirty seconds
 both: {film: film.yaml}
-voice: {type: preset, speaker: ryan, style: "Warm, upbeat and confident, like a friendly product launch. Clear, even pace."}
+voice:
+  type: preset
+  speaker: ryan
+  style: "Speak at a normal conversational pace in a calm, even, natural tone, like explaining something to a colleague. Plain delivery: no excitement, no emphasis, no drawn-out words."
+  temperature: 0.5      # steadier delivery
+  seed: 23
 talking_head: {enabled: false}
 music: {mood: upbeat}
 captions: {burn_in: true}

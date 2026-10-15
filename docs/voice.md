@@ -11,6 +11,7 @@ voice:
   description: ""       # described: the voice in words
   sample: voice/sample.wav   # clone: a consented sample (see below)
   temperature: 0.65     # 0.3-1.0; lower is steadier
+  seed: 7               # another number gives different takes of the same lines
   language: english
 ```
 
@@ -29,8 +30,9 @@ A `clone` voice never falls back: if it can't run, the build stops, because a di
 ## How narration is generated
 
 - Each sentence is generated on its own with a fixed seed, so re-renders sound the same.
-- Every sentence gets a length sanity check, and Whisper reads it back. A garbled, truncated or runaway take is
-  regenerated (up to three tries) and the best one is kept.
+- Every sentence gets a length sanity check, and Whisper reads it back. A garbled, truncated or runaway take, or a
+  drawn-out one (spoken much slower than normal speech), is regenerated (up to three tries) and the best one is
+  kept.
 - Sentences that never read back cleanly are listed at the end. Listen to those; rephrasing or spelling out an
   abbreviation usually fixes them.
 - Finished narration is cached in `<project>/.tts-cache/`, so editing one line only re-voices that line.
@@ -88,4 +90,8 @@ see [clodio](https://github.com/dassjaylabs/clodio), which runs the same models 
 - **"mlx-audio isn't installed"**: run `filmwright setup --voice preset` (or `described` / `clone`).
 - **A word is mispronounced**: spell it the way it sounds in the narration text, e.g. "Acme Sink" for a product called "AcmeSync".
 - **The voice drifts in energy between sentences**: lower `temperature` (0.5 is steadier).
+- **The delivery sounds over-excited, or words are drawn out**: ask for a plain delivery in `style` and leave out
+  words like "upbeat", "energetic" or "excited" (the README sample uses "Speak at a normal conversational pace in a
+  calm, even, natural tone..."; see `docs/media/sample/reel.yaml`), and try `temperature: 0.5`. If one line still
+  drags, try another `seed`.
 - **The recording is silent**: on macOS, allow microphone access for your terminal app in System Settings > Privacy & Security > Microphone.

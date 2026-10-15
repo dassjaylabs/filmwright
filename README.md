@@ -10,7 +10,7 @@ Everything runs locally: the browser, the voices, the music, the encoding. Nothi
 alt="A 30-second sample film made with filmwright: title, a demo walkthrough, an animated explainer, a feature montage and the options"></a>
 
 **[▶ Watch the 30-second sample with sound](docs/media/filmwright-sample.mp4)**, made with filmwright itself
-([source](docs/media/sample/film.yaml)): narrated by Qwen3-TTS (preset voice `ryan`) on a Mac, with an upbeat score
+([source](docs/media/sample/film.yaml)): narrated by Qwen3-TTS (preset voice `ryan`, in a plain conversational style) on a Mac, with an upbeat score
 from the built-in composer.
 
 ![Frames from filmwright example films: an animated character story, a whiteboard sketch, a product dashboard, a
@@ -93,7 +93,7 @@ eight, from a feature montage for a gym app to stories in a cloned voice.
 
 The neural voices are [Qwen3-TTS](https://huggingface.co/Qwen) 1.7B, and
 [Whisper](https://huggingface.co/openai/whisper-large-v3-turbo) large-v3-turbo listens to every sentence it speaks:
-a garbled, cut-off or runaway take is regenerated before it reaches the film. See
+a garbled, cut-off, runaway or drawn-out take is regenerated before it reaches the film. See
 [models, tools and fallbacks](#whats-inside-models-tools-and-fallbacks).
 
 On machines without Apple Silicon, `preset` and `described` fall back to the system voice with a note; a cloned
@@ -126,7 +126,7 @@ and they run on your machine.
 | Narration, `preset` | built-in narrators: `ryan`, `aiden`, `serena`, `vivian`, `dylan`, `eric`, `uncle_fu`, `ono_anna`, `sohee` | [Qwen3-TTS 1.7B CustomVoice](https://huggingface.co/Qwen) | 4.2 GB · Apache-2.0 |
 | Narration, `described` | turns a sentence ("calm narrator in her thirties") into a voice, renders it once as a reference, then clones that reference so the voice stays the same across the film | Qwen3-TTS 1.7B VoiceDesign + Base | 4.2 GB each · Apache-2.0 |
 | Voice cloning, `clone` | speaks in a recorded voice, only with a matching consent record | Qwen3-TTS 1.7B Base | 4.2 GB · Apache-2.0 |
-| Read-back check | transcribes every narrated sentence; a garbled, cut-off or runaway take is regenerated with a new seed (up to 3 tries, best kept, failures listed). Also transcribes clone recordings | [Whisper large-v3-turbo](https://huggingface.co/openai/whisper-large-v3-turbo) | 1.6 GB · MIT |
+| Read-back check | transcribes every narrated sentence; a garbled, cut-off, runaway or drawn-out take is regenerated with a new seed (up to 3 tries, best kept, failures listed). Also transcribes clone recordings | [Whisper large-v3-turbo](https://huggingface.co/openai/whisper-large-v3-turbo) | 1.6 GB · MIT |
 | Runs the speech models | Apple Silicon inference | [MLX](https://github.com/ml-explore/mlx) + [mlx-audio](https://github.com/Blaizzy/mlx-audio) (bf16/fp16 conversions by mlx-community) | MIT |
 | Narration, `system` | robotic but works anywhere, no download | [espeak-ng](https://github.com/espeak-ng/espeak-ng) | GPL-3.0 (separate program) |
 | Animation | animated scenes are HTML pages driven by filmwright's own timeline engine, rendered frame by frame, so every run gives the same film | `motion.js` (filmwright) + [rough.js](https://github.com/rough-stuff/rough) for the hand-drawn look, in Chromium | MIT |
