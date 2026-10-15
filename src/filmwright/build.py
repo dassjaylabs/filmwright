@@ -214,8 +214,15 @@ def build_both(reel: dict, root: Path) -> list[tuple[Path, list[Path]]]:
 
 def _stem(reel: dict, root: Path) -> str:
     import re
-    base = reel.get("title") or root.name
-    return re.sub(r"[^a-z0-9]+", "-", base.lower()).strip("-")[:60] or "film"
+    import unicodedata
+
+    def safe(name: str) -> str:
+        # Keep letters and digits of any script (plus combining marks) so non-Latin titles stay readable;
+        # turn everything else -- spaces, punctuation, path separators, control characters -- into one dash.
+        kept = "".join(ch if unicodedata.category(ch)[0] in "LNM" else "-" for ch in str(name).lower())
+        return re.sub(r"-+", "-", kept).strip("-")[:60].strip("-")
+
+    return safe(reel.get("title") or "") or safe(root.name) or "film"
 
 
 def finish(reel: dict, master: Path, already: list[Path], out_dir: Path, stem: str) -> list[Path]:

@@ -113,3 +113,24 @@ def test_stems_reach_the_pipelines(tmp_path):
     settings = build._settings(cfg, tmp_path)
     import json
     assert json.loads(settings.read_text())["outputs"] == ["stems", "hd"]     # stems, plus a master to export from
+
+
+def test_stem_keeps_letters_from_non_latin_scripts():
+    assert build._stem({"title": "タスク管理のご紹介"}, Path("my-film")) == "タスク管理のご紹介"
+    assert build._stem({"title": "Привет мир"}, Path("my-film")) == "привет-мир"
+
+
+def test_stem_falls_back_to_the_folder_name_not_film():
+    assert build._stem({"title": "!!!"}, Path("my-film")) == "my-film"
+    assert build._stem({"title": "😀😀"}, Path("my-film")) == "my-film"
+    assert build._stem({}, Path("my-film")) == "my-film"
+
+
+def test_stem_strips_path_separators_and_odd_characters():
+    stem = build._stem({"title": "a/b\\c:d*e?f\"g<h>i|j"}, Path("my-film"))
+    assert stem == "a-b-c-d-e-f-g-h-i-j"
+    assert "/" not in stem and "\\" not in stem
+
+
+def test_stem_keeps_ascii_titles_readable():
+    assert build._stem({"title": "My Cool Film!"}, Path("my-film")) == "my-cool-film"
