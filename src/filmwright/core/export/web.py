@@ -22,6 +22,8 @@ from pathlib import Path
 
 import yaml
 
+from filmwright.core.names import checked_slug
+
 
 def sh(*a: str) -> str:
     p = subprocess.run(a, capture_output=True, text=True)
@@ -77,7 +79,7 @@ def web_renditions(m: Path, srt: Path | None, out: Path, stem: str, poster_at: f
 def one(spec_path: Path, out: Path) -> dict:
     s = yaml.safe_load(spec_path.read_text())
     d = Path(str(s["dir"])).expanduser()
-    n, slug = int(s["episode"]), s["slug"]
+    n, slug = int(s["episode"]), checked_slug(s.get("slug"), f"{spec_path.name}: slug")
     stem, m = f"{n:02d}-{slug}", d / f"{slug}.mp4"
     files = web_renditions(m, d / f"{slug}.srt", out, stem)
     dur = float(sh("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(out / f"{stem}-720p.mp4")))

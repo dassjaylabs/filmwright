@@ -10,6 +10,11 @@ First public release.
   Korean and Russian lines all scored a perfect match, and Chinese and Japanese lines over about 3.5 seconds were
   taken for runaway takes. Accent marks are ignored when comparing, and clone samples are transcribed in their own
   language. (Reported by a user.)
+- File names: film names keep the letters of any script, so a Japanese or Russian title no longer becomes
+  `film` (#9, contributed). Product names, `file_prefix` and story slugs are made file-safe the same way in
+  every film type (a product called `Acme/Tasks` broke the path), the same title always gives the same name
+  however its accents were typed, and a series episode slug that can't be a file name is refused with a
+  suggestion (#12, #13).
 - Demo films: the narration no longer drifts behind the picture and captions from section to section (each
   section's AAC padding was being kept when sections were joined; up to about 60 ms in a 45-second film).
 

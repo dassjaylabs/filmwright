@@ -213,16 +213,8 @@ def build_both(reel: dict, root: Path) -> list[tuple[Path, list[Path]]]:
 # --- shared finishing ----------------------------------------------------------------------------------
 
 def _stem(reel: dict, root: Path) -> str:
-    import re
-    import unicodedata
-
-    def safe(name: str) -> str:
-        # Keep letters and digits of any script (plus combining marks) so non-Latin titles stay readable;
-        # turn everything else -- spaces, punctuation, path separators, control characters -- into one dash.
-        kept = "".join(ch if unicodedata.category(ch)[0] in "LNM" else "-" for ch in str(name).lower())
-        return re.sub(r"-+", "-", kept).strip("-")[:60].strip("-")
-
-    return safe(reel.get("title") or "") or safe(root.name) or "film"
+    from filmwright.core.names import file_safe
+    return file_safe(reel.get("title")) or file_safe(root.name) or "film"
 
 
 def finish(reel: dict, master: Path, already: list[Path], out_dir: Path, stem: str) -> list[Path]:

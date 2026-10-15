@@ -30,6 +30,7 @@ from pathlib import Path
 
 import yaml
 
+from filmwright.core.names import checked_slug
 from filmwright.paths import TEMPLATES
 from filmwright.series import brandkit
 
@@ -52,6 +53,10 @@ def find_series_dir(spec_path: Path) -> Path | None:
 
 def load(spec_path: Path) -> dict:
     spec = yaml.safe_load(spec_path.read_text())
+    try:
+        spec["slug"] = checked_slug(spec.get("slug"), f"{spec_path.name}: slug")
+    except ValueError as e:
+        raise SystemExit(str(e)) from None
     spec["_dir"] = Path(str(spec["dir"])).expanduser()
     spec["_series"] = find_series_dir(spec_path.resolve())
     name = spec.get("brand")

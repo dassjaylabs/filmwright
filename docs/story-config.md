@@ -11,7 +11,7 @@ A story project is a folder with `project.json`, `stories.json` and one output f
 | `product` | product name, used in narration ("The Acme Tasks way…") | required |
 | `wordmark` | text in the logo lockups | brand kit, else `product` in capitals |
 | `tagline`, `url` | line under the final wordmark, and an optional address under it | brand kit |
-| `file_prefix` | output names: `<prefix>-<slug>-hd.mp4` | `product`, lower case |
+| `file_prefix` | output names: `<prefix>-<slug>-hd.mp4`. Characters that can't be in a file name become dashes | `product`, lower case, made file-safe |
 | `brand` | a brand folder name/path (`brand.yaml`, shared with the other film types, see [brands.md](brands.md)) or an inline `{colors: {bg, accent, alt, warm, ink}, logo}` | the example palette |
 | `archetypes` | story shapes to rotate through, e.g. `"ABC"` or `"AAB"` | `"ABC"` |
 | `stories_per_palette` | consecutive stories that share an office wall colour | 3 |
@@ -27,7 +27,7 @@ A list of stories. Text fields are spoken unless noted.
 
 | field | example | used in |
 |---|---|---|
-| `n`, `slug` | `1`, `"support-on-call-rota"` | order, folder and file names |
+| `n`, `slug` | `1`, `"support-on-call-rota"` | order, folder and file names (characters that can't be in a file name become dashes) |
 | `arch` | `"A"`, `"B"` or `"C"` | optional: force a shape ([shapes](#story-shapes)) |
 | `name`, `pron`, `poss` | `"Priya"`, `"She"`, `"her"` | narration; always state pronouns explicitly |
 | `role` (on screen), `roleLine` | `"Support team lead"`, `"leads a twelve-person support team that never sleeps."` | name tag, "Meet …" line |

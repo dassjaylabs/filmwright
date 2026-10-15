@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 
 from filmwright import paths
+from filmwright.core.names import file_safe
 from filmwright.explainer import render as R
 
 TEMPLATE = paths.TEMPLATES / "story" / "story.html"
@@ -61,14 +62,18 @@ class Project:
         return self._brand
 
     def outdir(self, c: dict) -> Path:
-        return self.root / f"{c['n']:02d}-{c['slug']}"
+        return self.root / f"{c['n']:02d}-{self.slug(c)}"
 
     def arch(self, c: dict) -> str:
         shapes = self.cfg.get("archetypes", "ABC")
         return c.get("arch") or shapes[(c["n"] - 1) % len(shapes)]
 
+    def slug(self, c: dict) -> str:
+        return file_safe(c.get("slug"), lower=False) or f"story-{c['n']}"
+
     def stem(self, c: dict) -> str:
-        return f"{self.cfg.get('file_prefix') or self.cfg['product'].lower().replace(' ', '-')}-{c['slug']}"
+        prefix = file_safe(self.cfg.get("file_prefix"), lower=False) or file_safe(self.cfg["product"]) or "film"
+        return f"{prefix}-{self.slug(c)}"
 
     def page_config(self, c: dict) -> dict:
         walls = self.cfg.get("walls", DEFAULT_WALLS)
@@ -150,7 +155,7 @@ class Project:
         B.mkdir(parents=True, exist_ok=True)
         init = self.init(c)
         total, sfx = R.page_info(TEMPLATE, init)
-        print(f"{n:02d} {c['slug']}: {total:.2f}s, shape {self.arch(c)}", flush=True)
+        print(f"{n:02d} {self.slug(c)}: {total:.2f}s, shape {self.arch(c)}", flush=True)
         R.render_frames(TEMPLATE, init, total, B / "frames.mp4")
         bs = init["BEATS"]
         vo = R.narration_track(bs, {b["key"]: d / "vo" / f"{b['key']}.wav" for b in bs}, total,
