@@ -15,6 +15,7 @@ from pathlib import Path
 
 import yaml
 
+from filmwright.core.names import checked_slug
 from filmwright.series import brandkit
 
 
@@ -28,6 +29,10 @@ def main() -> int:
     rows = []
     for f in sorted((d / cfg.get("specs", "specs")).glob("ep*.yaml")):
         s = yaml.safe_load(f.read_text())
+        try:
+            s["slug"] = checked_slug(s.get("slug"), f"{f.name}: slug")
+        except ValueError as e:
+            raise SystemExit(str(e)) from None
         ep_dir = Path(str(s["dir"])).expanduser()
         n = int(s["episode"])
         stem = f"{n:02d}-{s['slug']}"

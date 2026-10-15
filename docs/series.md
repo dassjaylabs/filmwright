@@ -29,7 +29,7 @@ notes: ["anything to check before posting"]
 
 ```yaml
 dir: runs/my-series/ep02-boards             # where this episode is recorded and built
-slug: boards
+slug: boards                                # folder and file names: letters, digits and dashes only
 episode: 2
 of: 12
 title: [Shared, Boards]                     # two lines on the intro; the second may be ""

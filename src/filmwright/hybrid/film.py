@@ -33,6 +33,7 @@ from pathlib import Path
 import yaml
 
 from filmwright import paths
+from filmwright.core.names import file_safe
 from filmwright.explainer import render as R
 
 TEMPLATE = paths.TEMPLATES / "hybrid" / "scenes.html"
@@ -84,7 +85,7 @@ class Film:
 
     @property
     def stem(self) -> str:
-        return self.cfg.get("file_prefix") or self.spec.stem
+        return file_safe(self.cfg.get("file_prefix"), lower=False) or file_safe(self.spec.stem, lower=False) or "film"
 
     def brand(self) -> dict:
         spec = self.cfg.get("brand")

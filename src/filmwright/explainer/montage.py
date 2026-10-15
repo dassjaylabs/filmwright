@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 
 from filmwright import paths
+from filmwright.core.names import file_safe
 from filmwright.explainer import render as R
 
 TEMPLATE = paths.TEMPLATES / "montage" / "montage.html"
@@ -43,7 +44,8 @@ class Montage:
 
     @property
     def stem(self) -> str:
-        return self.cfg.get("file_prefix") or (self.cfg["product"].lower().replace(" ", "-") + "-montage")
+        return (file_safe(self.cfg.get("file_prefix"), lower=False)
+                or (file_safe(self.cfg["product"]) or "film") + "-montage")
 
     def brand(self) -> dict:
         spec = self.cfg.get("brand")
