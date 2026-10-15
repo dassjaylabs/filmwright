@@ -10,8 +10,9 @@ How generation works:
 - Each sentence is generated separately and seeded, so a re-render sounds the same.
 - Every sentence gets a length sanity check.
 - With verify on, Whisper reads each sentence back.
-- A garbled, truncated or runaway sentence is regenerated with the next seed, up to three tries, and the best
-  attempt is kept. Sentences that never read back cleanly are listed by close().
+- A garbled, truncated, runaway or drawn-out sentence (spoken much slower than normal speech) is regenerated
+  with the next seed, up to three tries, and the best attempt is kept. Sentences that never read back cleanly,
+  or stayed drawn out, are listed by close().
 - Results are cached per sentence group, so re-building after a small text edit costs little.
 - Design mode renders the description once into a reference clip, then clones that clip for every sentence.
   Generating each sentence from the description would give a slightly different voice each time.
@@ -49,6 +50,7 @@ WHISPER_LANG = {"english": "en", "chinese": "zh", "japanese": "ja", "korean": "k
 SENTENCE_GAP = 0.28         # seconds of silence between sentences
 MIN_SCORE = 0.8             # read-back similarity below which a sentence is regenerated
 ATTEMPTS = 3
+MAX_PACE = 1.25            # spoken length / speech_seconds() above which a take counts as drawn out
 DESIGN_REF_TEXT = ("Hi there. In this short walkthrough, I'll show you what changed, why it matters, "
                    "and how it looks on screen. It only takes a few minutes, so let's get started.")
 DEFAULT_SPEAKER = "ryan"     # native-English male preset
@@ -108,6 +110,20 @@ def speech_seconds(text: str) -> float:
     """A rough spoken length: about 155 words a minute, or 6 characters a second for Chinese and Japanese."""
     unspaced = len(_UNSPACED.findall(text))
     return max(1.0, len(words(_UNSPACED.sub(" ", text))) / 2.6 + unspaced / 6.0)
+
+
+def spoken_seconds(audio: Any, rate: int) -> float:
+    """Length from the first to the last sound, leaving out leading and trailing silence (10 ms windows quieter
+    than 2% of the loudest)."""
+    import numpy as np
+    x = np.asarray(audio, dtype=np.float32)
+    win = max(1, rate // 100)
+    k = len(x) // win
+    if k == 0:
+        return 0.0
+    env = np.sqrt(np.mean(x[:k * win].reshape(k, win) ** 2, axis=1))
+    loud = np.flatnonzero(env > 0.02 * env.max()) if env.max() > 0 else []
+    return (loud[-1] - loud[0] + 1) * win / rate if len(loud) else 0.0
 
 
 def match_score(expected: str, heard: str) -> float:
@@ -191,6 +207,7 @@ class QwenVoice:
         self._loaded = ""
         self.whisper = Transcriber(WHISPER_LANG.get(language, "en" if language == "auto" else None))
         self.report: list[tuple[str, float]] = []   # (sentence, best score) for sentences that never read back cleanly
+        self.slow: list[tuple[str, float]] = []     # (sentence, pace) for sentences that stayed drawn out
 
     @property
     def name(self) -> str:
@@ -243,11 +260,12 @@ class QwenVoice:
         """One sentence (or the design reference) with length check, read-back and retries."""
         rate = 24000
         expected = speech_seconds(text)
-        best: tuple[float, Any] | None = None
+        best: tuple[tuple, float, float, Any] | None = None
         for attempt in range(ATTEMPTS):
             audio = self._generate(text, mode, self.seed + attempt * 1000)
             rate = self.model.sample_rate
             secs = len(audio) / rate
+            pace = spoken_seconds(audio, rate) / expected
             score = 1.0
             if not (0.4 * expected <= secs <= 2.5 * expected + 1.0):
                 score = 0.0                                     # truncated or runaway
@@ -256,21 +274,26 @@ class QwenVoice:
                     write_wav(Path(tmp.name), audio, rate)
                     score = match_score(text, self.whisper(Path(tmp.name)))
                 os.unlink(tmp.name)
-            if best is None or score > best[0]:
-                best = (score, audio)
-            if score >= MIN_SCORE:
+            # a take that reads back wins; among those, one at a normal pace; then the least drawn out
+            rank = (score >= MIN_SCORE, pace <= MAX_PACE, -max(pace, MAX_PACE), score)
+            if best is None or rank > best[0]:
+                best = (rank, score, pace, audio)
+            if score >= MIN_SCORE and pace <= MAX_PACE:
                 break
         assert best is not None
-        if best[0] < MIN_SCORE:
-            self.report.append((text, best[0]))
-        write_wav(out, best[1], rate)
+        _, score, pace, audio = best
+        if score < MIN_SCORE:
+            self.report.append((text, score))
+        elif pace > MAX_PACE:
+            self.slow.append((text, pace))
+        write_wav(out, audio, rate)
 
     # --- public -------------------------------------------------------------------------
 
     def cache_key(self, text: str) -> str:
         ref = sha256(self.ref_audio) if self.mode == "clone" and self.ref_audio else ""
         return hashlib.sha256(json.dumps([MODELS[self.mode], self.mode, self.instruct, self.speaker,
-                                          self.language, self.seed, self.temperature, self.verify, ref,
+                                          self.language, self.seed, self.temperature, self.verify, MAX_PACE, ref,
                                           self.ref_text if self.mode == "clone" else "", text]).encode()).hexdigest()[:16]
 
     def say(self, text: str, out_wav: Path) -> float:
@@ -309,3 +332,8 @@ class QwenVoice:
                      "(rephrasing or spelling out an abbreviation usually helps):")
             for sen, score in self.report:
                 self.log(f"  {score:.2f}  {sen}")
+        if self.slow:
+            self.log(f"\n{len(self.slow)} sentence(s) still sound drawn out after {ATTEMPTS} tries; listen to them "
+                     "(a calmer `voice.style`, or splitting a long sentence, usually helps):")
+            for sen, pace in self.slow:
+                self.log(f"  {pace:.2f}x  {sen}")

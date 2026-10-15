@@ -10,6 +10,9 @@ First public release.
   Korean and Russian lines all scored a perfect match, and Chinese and Japanese lines over about 3.5 seconds were
   taken for runaway takes. Accent marks are ignored when comparing, and clone samples are transcribed in their own
   language. (Reported by a user.)
+- Narration: a take spoken much slower than normal speech (drawn-out words) is now regenerated like a garbled
+  one, and the most natural take is kept (#15). The README sample is re-narrated in a plain conversational style
+  at a normal pace (#16, from user feedback).
 - File names: film names keep the letters of any script, so a Japanese or Russian title no longer becomes
   `film` (#9, contributed). Product names, `file_prefix` and story slugs are made file-safe the same way in
   every film type (a product called `Acme/Tasks` broke the path), the same title always gives the same name
