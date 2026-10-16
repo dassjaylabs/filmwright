@@ -1,0 +1,55 @@
+{
+  "about": "Narrator voices designed with Qwen3-TTS VoiceDesign (Apache-2.0); synthetic, not modelled on any real person. Rebuild with scripts/build_voice_library.py.",
+  "text": "Hi there. In this short walkthrough, I'll show you what changed, why it matters, and how it looks on screen. It only takes a few minutes, so let's get started.",
+  "voices": {
+    "nora": {
+      "label": "Nora: American woman, 30s, warm and clear product guide",
+      "description": "A woman in her early thirties with a warm, clear American voice. She speaks at a natural conversational pace, friendly and confident, like a product guide showing a colleague around. Even tone, no sales pitch, no exaggerated emphasis.",
+      "seed": 1,
+      "sha256": "c7d9c12c8a0b9d726c70b3868306f57011bf680bea9c55992588ae9030a52dd7",
+      "seconds": 11.04
+    },
+    "james": {
+      "label": "James: American man, 30s, relaxed and conversational",
+      "description": "A man in his thirties with a relaxed, natural American voice and a mid-range tone. He speaks at a normal conversational pace, calm and easy, like explaining something to a friend. Plain delivery, no excitement, no drawn-out words.",
+      "seed": 3,
+      "sha256": "2ceef3a421fcaafcab9bcb9814b049c6169fef5048af87bb56db195c3c25f1ca",
+      "seconds": 11.04
+    },
+    "olivia": {
+      "label": "Olivia: British woman, 30s, calm and polished presenter",
+      "description": "A woman in her thirties with a calm, polished British voice. She speaks clearly at an even, unhurried but natural pace, like a professional presenter. Understated and confident, never theatrical.",
+      "seed": 2,
+      "sha256": "2ffd1ef4ae9fb6d5be737df90fe94e96a53fa3309a811db12436059ba8753ed3",
+      "seconds": 10.8
+    },
+    "henry": {
+      "label": "Henry: British man, 40s, steady and trustworthy",
+      "description": "A man in his forties with a steady, warm British voice and a slightly low register. He speaks at a measured, natural pace with quiet confidence, like a trusted advisor. Plain delivery, no drama.",
+      "seed": 2,
+      "sha256": "cd22cbb08d45b9201b7e37d63308cd4b8aa21974d578e3126ea6a7518e4da385",
+      "seconds": 13.12
+    },
+    "priya": {
+      "label": "Priya: Indian English woman, 30s, bright and clear explainer",
+      "description": "A woman in her thirties with a clear Indian English accent and a bright, friendly mid-range voice. She speaks at a natural, steady pace, articulate and approachable, like a teacher explaining something simply. No exaggerated emphasis.",
+      "seed": 3,
+      "sha256": "33286b8cc125245da6736086e5458719365019c3ea7955e3a93dc7e89865d83f",
+      "seconds": 11.52
+    },
+    "marcus": {
+      "label": "Marcus: American man, 40s, deep and assured (B2B)",
+      "description": "A man in his forties with a deep, smooth American voice. He speaks at a calm, natural pace with quiet authority, like a narrator for an enterprise software video. Even, assured delivery, no hype.",
+      "seed": 4,
+      "sha256": "b6bd3a68d53a1488befc4ca952d76700434efafddf5383ab1379545e542045dd",
+      "seconds": 12.72
+    },
+    "ethan": {
+      "label": "Ethan: American man, late 20s, bright and friendly (launches)",
+      "description": "A man in his late twenties with a bright, friendly American voice. He speaks at a lively but natural conversational pace, upbeat without sounding like an advert, like a founder showing off something he built. Clear, never shouty, no drawn-out words.",
+      "seed": 4,
+      "sha256": "2fec0dc8b98ad3de1fdc3c6aacbbec2a5fca1e21e63c9e36fb7961bff2211f82",
+      "seconds": 9.84
+    }
+  }
+}

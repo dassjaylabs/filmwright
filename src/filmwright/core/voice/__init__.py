@@ -7,8 +7,9 @@
 
 `cfg` is the `voice:` block of reel.yaml:
 
-    type         preset | described | clone | system           (default: preset)
+    type         preset | library | described | clone | system  (default: preset)
     speaker      preset: a built-in speaker name                 (default: ryan)
+    name         library: a ready-made narrator (nora, james, olivia, ...; see library.json)
     description  described: the voice in words, e.g. "Calm, friendly narrator in her thirties"
     sample       clone: path to the consented sample (relative to `root`)
     style        delivery instruction for preset voices          (default: natural and conversational)
@@ -17,8 +18,8 @@
     seed, verify advanced: generation seed, read-back check on/off
     system_voice, rate   system: espeak-ng voice name and words per minute
 
-preset, described and clone run Qwen3-TTS on Apple Silicon. When that isn't possible on this machine, preset and
-described fall back to the system voice with a clear message. A cloned voice never falls back silently: it
+preset, library, described and clone run Qwen3-TTS on Apple Silicon. When that isn't possible on this machine, preset,
+library and described fall back to the system voice with a clear message. A cloned voice never falls back silently: it
 raises, because a different voice is not what was asked for. Clone mode always requires a consent record.
 """
 
@@ -39,7 +40,7 @@ from .qwen import (
     mlx_status,
 )
 
-VOICE_TYPES = ("preset", "described", "clone", "system")
+VOICE_TYPES = ("preset", "library", "described", "clone", "system")
 
 __all__ = ["make_voice", "Voice", "VOICE_TYPES", "PRESET_SPEAKERS", "ConsentError", "VoiceUnavailable",
            "verify_consent", "write_consent", "mlx_status", "QwenVoice", "EspeakVoice"]
@@ -85,6 +86,17 @@ def make_voice(cfg: dict[str, Any] | None, root: Path | None = None, cache: Path
         if reason:
             raise VoiceUnavailable(f"a cloned voice can't run here: {reason}. Use voice.type preset or system on this machine.")
         return QwenVoice("clone", ref_audio=path, ref_text=cfg.get("sample_text"), **common)
+
+    if kind == "library":
+        from .library import reference
+        clip, text, entry = reference(str(cfg.get("name") or ""))     # an unknown name or altered clip stops here
+        reason = mlx_status()
+        if reason:
+            log(f"note: {reason}. Narrating with the system voice (espeak-ng) instead.")
+            return system()
+        # a bundled synthetic voice: cloned from its checksum-verified clip (no consent record needed)
+        return QwenVoice("design", instruct=entry["description"], ref_audio=clip, ref_text=text, label=f"library voice {cfg['name']}",
+                         **common)
 
     desc = str(cfg.get("description") or "").strip()
     if kind == "described" and not desc:

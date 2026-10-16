@@ -8,8 +8,9 @@ default shown. `filmwright options` prints the same choices.
 | `mode` | `demo`, `explainer`, `both` | `demo` | Screen-recorded walkthrough, fully animated explainer, or both in one film |
 | `title` | text | `""` | The film's title (cards, file metadata) |
 | `brand` | bundled name or folder | `example` | Colours, logo and wordmark ([brands.md](brands.md)) |
-| `voice.type` | `preset`, `described`, `clone`, `system` | `preset` | Who narrates ([voice.md](voice.md)) |
+| `voice.type` | `preset`, `library`, `described`, `clone`, `system` | `preset` | Who narrates ([voice.md](voice.md)) |
 | `voice.speaker` | `ryan`, `aiden`, … | `ryan` | Preset speaker |
+| `voice.name` | `nora`, `james`, `olivia`, `henry`, `priya`, `marcus`, `ethan` | — | Library narrator ([voice.md](voice.md#library-voices)) |
 | `voice.description` | text | | Described voice, e.g. "Calm, friendly narrator in her thirties" |
 | `voice.sample` | path | | Cloned voice: the speaker's recording (needs a consent record) |
 | `voice.style` | text | natural, relaxed | Delivery instruction for preset voices |
@@ -54,7 +55,7 @@ outputs: [hd, stems]
 | Option | macOS (Apple Silicon) | macOS (Intel), Linux |
 |---|---|---|
 | Demo, explainer, both | yes | yes |
-| `voice.type: preset`, `described`, `clone` | yes (one-time model download) | not yet: `preset` and `described` fall back to `system`; `clone` stops with an error |
+| `voice.type: preset`, `library`, `described`, `clone` | yes (one-time model download) | not yet: `preset`, `library` and `described` fall back to `system`; `clone` stops with an error |
 | `voice.type: system` | yes | yes |
 | Talking head, music, all outputs | yes | yes |
 

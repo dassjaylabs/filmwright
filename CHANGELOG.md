@@ -10,6 +10,9 @@ First public release.
   Korean and Russian lines all scored a perfect match, and Chinese and Japanese lines over about 3.5 seconds were
   taken for runaway takes. Accent marks are ignored when comparing, and clone samples are transcribed in their own
   language. (Reported by a user.)
+- Voices: a library of 7 ready-made narrators with a plain, natural delivery, `voice: {type: library, name:
+  olivia}`. Each is a bundled, checksum-verified synthetic reference clip cloned with the Base model, so it sounds
+  the same on every machine (#20).
 - Sound: a new `sound_effects` setting, `subtle` by default. Films keep the quiet interface sounds (click, pop,
   tick, chime) and drop the whooshes, swishes, risers and impacts on zooms and scene changes, which distracted from
   the narration; `full` brings them back, `off` removes all effects (#18).

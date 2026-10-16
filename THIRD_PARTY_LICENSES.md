@@ -35,7 +35,7 @@ to license. The talking-head characters are drawn in code by filmwright.
 
 | Model | Used for | License |
 |---|---|---|
-| [Qwen3-TTS 1.7B](https://huggingface.co/Qwen) CustomVoice / VoiceDesign / Base (MLX conversions by mlx-community) | preset, described and cloned voices | Apache-2.0 |
+| [Qwen3-TTS 1.7B](https://huggingface.co/Qwen) CustomVoice / VoiceDesign / Base (MLX conversions by mlx-community) | preset, library, described and cloned voices; the bundled library clips (`assets/voices/`) were generated with VoiceDesign | Apache-2.0 |
 | [Whisper large-v3-turbo](https://huggingface.co/openai/whisper-large-v3-turbo) (MLX conversion) | reads each sentence back; transcribes clone samples | MIT |
 
 ## Programs installed by `filmwright setup`

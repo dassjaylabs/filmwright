@@ -22,6 +22,7 @@ CHOICE_HELP = {
     },
     "voice": {
         "preset": "Preset voice: a built-in narrator (no recording needed)",
+        "library": "Library voice: a ready-made, natural narrator (nora, james, olivia, henry, priya, marcus, ethan)",
         "described": "Described voice: describe the voice in words and one is designed for you",
         "clone": "Cloned voice: your own voice from a short recording (needs the speaker's consent)",
         "system": "System voice: works on any machine, robotic, no download",
@@ -110,10 +111,15 @@ def run(preset: dict[str, Any], interactive: bool) -> dict:
     voice_opts = dict(CHOICE_HELP["voice"])
     if not caps.neural_voice:
         note = " [not available on this machine yet]"
-        for k in ("preset", "described", "clone"):
+        for k in ("preset", "library", "described", "clone"):
             voice_opts[k] += note
     vt = pick("voice", lambda: _ask("Narration voice?", voice_opts, "preset" if caps.neural_voice else "system"))
     cfg["voice"]["type"] = vt or ("preset" if caps.neural_voice else "system")
+    if cfg["voice"]["type"] == "library":
+        from filmwright.core.voice.library import voices
+        lib = voices()
+        nm = pick("voice_name", lambda: _ask("Which narrator?", {k: v["label"] for k, v in lib.items()}, next(iter(lib))))
+        cfg["voice"]["name"] = nm or next(iter(lib))
     if cfg["voice"]["type"] == "described":
         d = pick("voice_description", lambda: _text("Describe the voice", "Warm, friendly narrator in her thirties, clear American accent"))
         cfg["voice"]["description"] = d or "Warm, friendly narrator, clear accent"
@@ -155,7 +161,7 @@ def run(preset: dict[str, Any], interactive: bool) -> dict:
 
 def summary(cfg: dict) -> str:
     v = cfg["voice"]
-    voice = {"preset": f"preset ({v.get('speaker')})", "described": f"described ({v.get('description')})",
+    voice = {"preset": f"preset ({v.get('speaker')})", "library": f"library ({v.get('name')})", "described": f"described ({v.get('description')})",
              "clone": f"cloned from {v.get('sample')}", "system": "system"}[v["type"]]
     th = cfg["talking_head"]
     lines = [

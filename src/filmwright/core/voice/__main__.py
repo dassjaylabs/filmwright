@@ -2,6 +2,7 @@
 
     python -m filmwright.core.voice preview --play                          # preset speaker ryan
     python -m filmwright.core.voice preview --type preset --speaker aiden --style "Warm and upbeat" --play
+    python -m filmwright.core.voice preview --type library --name olivia --play
     python -m filmwright.core.voice preview --type described --description "Calm, friendly narrator in her thirties" --play
     python -m filmwright.core.voice preview --type clone --sample voice/sample.wav --play
     python -m filmwright.core.voice preview --type system --play
@@ -40,6 +41,7 @@ def main(argv: list[str] | None = None) -> int:
     pv = sub.add_parser("preview", help="speak one short paragraph in the chosen voice")
     pv.add_argument("--type", choices=VOICE_TYPES, default="preset")
     pv.add_argument("--speaker")
+    pv.add_argument("--name", help="library voice name")
     pv.add_argument("--style")
     pv.add_argument("--description")
     pv.add_argument("--sample", type=Path)
@@ -60,7 +62,7 @@ def main(argv: list[str] | None = None) -> int:
         print(", ".join(sorted(load_model(MODELS["custom"]).get_supported_speakers())))
         return 0
 
-    cfg = {k: v for k, v in {"type": args.type, "speaker": args.speaker, "style": args.style,
+    cfg = {k: v for k, v in {"type": args.type, "speaker": args.speaker, "name": args.name, "style": args.style,
                              "description": args.description, "sample": str(args.sample) if args.sample else None,
                              "language": args.language, "seed": args.seed}.items() if v is not None}
     try:

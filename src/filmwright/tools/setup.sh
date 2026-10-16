@@ -3,10 +3,11 @@
 #
 #   setup.sh --check                    report OK / MISSING for every dependency, change nothing
 #   setup.sh                            install everything that doesn't need an admin password
-#   setup.sh --voice preset|described|clone|all
+#   setup.sh --voice preset|library|described|clone|all
 #                                       also the neural voices (Apple Silicon only): mlx-audio into the current
 #                                       Python environment, and the models that voice type needs:
 #       preset    = built-in speakers           CustomVoice 4.2 GB + Whisper 1.6 GB
+#       library   = a ready-made narrator        Base 4.2 GB + Whisper 1.6 GB
 #       described = a voice described in words  VoiceDesign 4.2 GB + Base 4.2 GB + Whisper 1.6 GB
 #       clone     = a consented voice sample    Base 4.2 GB + Whisper 1.6 GB
 #     Combine with --check to see what's cached. Models go to the Hugging Face cache (~/.cache/huggingface).
@@ -36,14 +37,14 @@ for arg in "$@"; do
     --check) MODE="check" ;;
     --voice) VOICE="preset" ;;
     --voice=*) VOICE="${arg#--voice=}" ;;
-    preset|described|clone|all)
+    preset|library|described|clone|all)
       if [[ "${PREV:-}" == "--voice" ]]; then VOICE="$arg"; else echo "unknown option: $arg (did you mean --voice $arg?)" >&2; exit 1; fi ;;
-    -h|--help) sed -n '2,29p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,30p' "$0"; exit 0 ;;
     *) echo "unknown option: $arg (see --help)" >&2; exit 1 ;;
   esac
   PREV="$arg"
 done
-case "$VOICE" in ""|preset|described|clone|all) ;; *) echo "--voice takes preset, described, clone or all" >&2; exit 1 ;; esac
+case "$VOICE" in ""|preset|library|described|clone|all) ;; *) echo "--voice takes preset, library, described, clone or all" >&2; exit 1 ;; esac
 
 OS="$(uname -s)"
 ARCH="$(uname -m)"
@@ -262,7 +263,7 @@ voice_repos() {   # what a voice type needs; Whisper reads every sentence back (
   case "$1" in
     preset)    echo "$QBASE-CustomVoice-bf16 $WHISPER_REPO" ;;
     described) echo "$QBASE-VoiceDesign-bf16 $QBASE-Base-bf16 $WHISPER_REPO" ;;
-    clone)     echo "$QBASE-Base-bf16 $WHISPER_REPO" ;;
+    clone|library) echo "$QBASE-Base-bf16 $WHISPER_REPO" ;;
     all)       echo "$QBASE-Base-bf16 $QBASE-VoiceDesign-bf16 $QBASE-CustomVoice-bf16 $WHISPER_REPO" ;;
   esac
 }
@@ -281,7 +282,7 @@ EOF
 if [[ "$OS" == "Darwin" && "$ARCH" == "arm64" ]]; then
   if [[ -z "$VOICE" ]]; then
     if mlx_ok; then row "neural voices (optional)" OK "mlx-audio installed; models: setup --check --voice all"
-    else row "neural voices (optional)" OPTIONAL "preset / described / cloned voices: setup --voice preset|described|clone"; fi
+    else row "neural voices (optional)" OPTIONAL "preset / library / described / cloned voices: setup --voice preset|library|described|clone"; fi
   else
     if mlx_ok; then row "mlx-audio" OK "$("$PY" -c 'import importlib.metadata as m; print(m.version("mlx-audio"))')"
     elif [[ "$MODE" == "check" ]]; then row "mlx-audio" MISSING "run: setup --voice $VOICE"
