@@ -1,11 +1,11 @@
 """Mix narration, music and sound effects into one loudness-normalised track.
 
     from filmwright.core.mix import mix
-    mix("vo.wav", "mix.wav", music_wav="music.wav", sfx_wav="sfx.wav", music_db_under=-14)
+    mix("vo.wav", "mix.wav", music_wav="music.wav", sfx_wav="sfx.wav", music_db_under=-20)
 
 - The narration is the reference. Music is levelled to `music_db_under` dB relative to the narration's loudness
-  (about -12 to -14 suits a beat-synced explainer score, -20 a quiet bed under a walkthrough), then ducked a
-  little further whenever someone speaks.
+  (filmwright uses -20 for a score and -26 for an ambient bed, so the voice always leads), then ducked a little
+  further whenever someone speaks.
 - Sound effects sit `sfx_db` dB relative to their own level (they are already made quiet by sfx_track()).
 - The result is normalised to `target_lufs` (default -16 LUFS, a common level for web video) with a true-peak
   ceiling, 48 kHz stereo.
@@ -44,7 +44,7 @@ def lufs(path: Path | str) -> float:
 
 
 def mix(narration_wav: Path | str | None, out_wav: Path | str, music_wav: Path | str | None = None,
-        sfx_wav: Path | str | None = None, *, music_db_under: float = -14.0, duck: bool = True,
+        sfx_wav: Path | str | None = None, *, music_db_under: float = -20.0, duck: bool = True,
         sfx_db: float = -3.0, narration_delay: float = 0.0, seconds: float | None = None,
         target_lufs: float = -16.0, true_peak: float = -1.5, stems_dir: Path | str | None = None) -> Path:
     """Write the final mix to `out_wav` and return its path."""

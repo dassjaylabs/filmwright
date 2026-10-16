@@ -101,6 +101,10 @@ def _resolve_demo(reel: dict, root: Path) -> tuple[Path, Path]:
     else:
         film.pop("presenter", None)
     film["checks"] = reel["checks"]
+    if "sound_effects" in reel.get("_explicit", []):          # else video.yaml's own `sfx` stands (subtle by default)
+        own = film.get("sfx", True)
+        film["sfx"] = False if reel["sound_effects"] == "off" else \
+            {**(own if isinstance(own, dict) else {}), "sounds": reel["sound_effects"]}
     film["stems"] = "stems" in reel["outputs"]
     film.setdefault("output", f"out/{_stem(reel, root)}")
     resolved = src.with_name(f".{src.stem}.resolved.yaml")      # beside the original: its relative clip paths still work
@@ -138,6 +142,7 @@ def _settings(reel: dict, root: Path, native: tuple[str, ...] = PIPELINE_OUTPUTS
     music = {"mood": m["mood"], "sync_to_scenes": bool(m.get("sync_to_scenes", True))}
     if m.get("level") is not None:
         music["level"] = float(m["level"])
+    music["sound_effects"] = reel["sound_effects"]
     outs = [o for o in reel["outputs"] if o in native]
     if not any(o in ("4k", "hd") for o in outs):
         outs.append("hd")                                              # always keep a master to export from

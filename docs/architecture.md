@@ -45,7 +45,7 @@ talking_head:
 music:
   mood: upbeat             # upbeat | calm | corporate | inspiring | playful | epic | sad | suspense | none
   sync_to_scenes: true
-  level: -12               # optional: dB under the narration (auto by default)
+  level: -20               # optional: dB under the narration (auto by default)
 captions:
   burn_in: true            # small captions at the bottom; an .srt is always written
 outputs: [4k, hd]          # 4k | hd | vertical | square | web | gif

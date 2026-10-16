@@ -32,6 +32,7 @@ recorded demo with a presenter, a hybrid title scene and a vertical feature mont
 | Narration voice | `preset` (built-in narrators), `described` (describe a voice in words), `clone` (your own voice, with consent), `system` (works anywhere) |
 | Talking head | an animated, lip-synced presenter in the corner, 10 characters, or none |
 | Music | original score in a mood: `upbeat`, `calm`, `corporate`, `inspiring`, `playful`, `epic`, `sad`, `suspense`, or `none`; downbeats land on scene changes |
+| Sound effects | `subtle` (quiet clicks and pops only, the default), `full` (adds whooshes and risers on transitions) or `off` |
 | Captions | small and burned in at the bottom, plus an `.srt` |
 | Outputs | `4k`, `hd`, `vertical` (9:16), `square` (1:1), `web` (720p/480p + WebVTT), `gif` teaser, `stems` (narration, music and effects as separate WAVs for your own editor) |
 | Disclosure | note the synthetic voice in the file metadata, on an end card, or not at all |
@@ -134,7 +135,7 @@ and they run on your machine.
 | Lip sync | mouth shapes timed to the narration | [Rhubarb Lip Sync](https://github.com/DanielSWolf/rhubarb-lip-sync) | MIT |
 | Demo recording | drives your web app and records it, with zooms on each action | [Playwright](https://playwright.dev) + open-source Chromium | Apache-2.0 / BSD |
 | Music | an original score per mood (tempo, key, chords, arrangement) with a downbeat on every scene change. No AI music model | filmwright's composer, synthesised with NumPy | MIT |
-| Sound effects | clicks, whooshes, risers, impacts | filmwright's synthesiser | MIT |
+| Sound effects | clicks, pops, chimes; whooshes and risers only with `sound_effects: full` | filmwright's synthesiser | MIT |
 | Encoding | mixing, loudness, captions, every output format | [ffmpeg](https://ffmpeg.org) | LGPL/GPL (separate program) |
 
 The models download once from Hugging Face, and only the ones the chosen voice type needs

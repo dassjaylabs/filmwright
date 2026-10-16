@@ -20,8 +20,8 @@ def test_music_plan():
     assert music_plan({}) is None
     assert music_plan({"music": {"mood": "none"}}) is None
     p = music_plan({"music": "upbeat"})
-    assert p["mood"] == "upbeat" and p["sync_to_scenes"] is True and p["level_lufs"] == NARRATION_LUFS - 12   # a score
-    assert music_plan({"music": {"mood": "calm", "sync_to_scenes": False}})["level_lufs"] == NARRATION_LUFS - 22   # a bed
+    assert p["mood"] == "upbeat" and p["sync_to_scenes"] is True and p["level_lufs"] == NARRATION_LUFS - 20   # a score
+    assert music_plan({"music": {"mood": "calm", "sync_to_scenes": False}})["level_lufs"] == NARRATION_LUFS - 26   # a bed
     assert music_plan({"music": {"mood": "calm", "level": -10}})["level_lufs"] == NARRATION_LUFS - 10
     assert music_plan({"music": {"mood": "calm", "level_lufs": -35}})["level_lufs"] == -35
 

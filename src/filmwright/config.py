@@ -21,6 +21,7 @@ MOODS = ("upbeat", "calm", "corporate", "inspiring", "playful", "epic", "sad", "
 OUTPUTS = ("4k", "hd", "vertical", "square", "web", "gif", "stems")
 VIDEO_OUTPUTS = OUTPUTS[:-1]                 # stems come alongside a video, never instead of one
 DISCLOSURE = ("none", "metadata", "end-card")
+SOUND_EFFECTS = ("subtle", "full", "off")    # subtle: interface sounds only, no whooshes or risers
 CHECK_LEVELS = ("off", "warn", "block")
 EXPLAINER_FORMATS = ("story", "montage")
 
@@ -31,6 +32,7 @@ DEFAULTS: dict[str, Any] = {
     "voice": {"type": "preset", "speaker": "ryan", "description": "", "sample": "", "style": "", "language": "English"},
     "talking_head": {"enabled": False, "character": "leo", "corner": "bottom-right"},
     "music": {"mood": "upbeat", "sync_to_scenes": True, "level": None},
+    "sound_effects": "subtle",
     "captions": {"burn_in": True},
     "outputs": ["4k", "hd"],
     "disclosure": "metadata",
@@ -80,6 +82,7 @@ def validate(cfg: dict) -> list[str]:
         if not any(o in VIDEO_OUTPUTS for o in outs):
             e.append("outputs: stems come with a video; add one of " + ", ".join(VIDEO_OUTPUTS))
     _one_of(e, "disclosure", cfg["disclosure"], DISCLOSURE)
+    _one_of(e, "sound_effects", cfg["sound_effects"], SOUND_EFFECTS)
     _one_of(e, "checks.tool_names", cfg["checks"].get("tool_names"), CHECK_LEVELS)
     if cfg["mode"] == "explainer":
         _one_of(e, "explainer.format", cfg["explainer"].get("format"), EXPLAINER_FORMATS)

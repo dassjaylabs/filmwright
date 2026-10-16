@@ -37,6 +37,11 @@ CHOICE_HELP = {
         "suspense": "Suspense: tense pulses, unresolved",
         "none": "No music",
     },
+    "sound_effects": {
+        "subtle": "Subtle: quiet clicks and pops that follow the action (recommended)",
+        "full": "Full: also whooshes and risers on zooms and scene changes",
+        "off": "No sound effects",
+    },
     "disclosure": {
         "metadata": "Note the synthetic voice in the file's metadata (recommended)",
         "end-card": "Also show a short closing card saying the voice is synthetic",
@@ -128,6 +133,9 @@ def run(preset: dict[str, Any], interactive: bool) -> dict:
     mood = pick("music", lambda: _ask("Music?", CHOICE_HELP["music"], "upbeat"))
     cfg["music"]["mood"] = mood or "upbeat"
 
+    fx = pick("sound_effects", lambda: _ask("Sound effects?", CHOICE_HELP["sound_effects"], "subtle"))
+    cfg["sound_effects"] = fx or "subtle"
+
     burn = pick("captions", lambda: _yes("Burn small captions into the video? (an .srt is always written)", True))
     cfg["captions"]["burn_in"] = True if burn is None else bool(burn)
 
@@ -155,6 +163,7 @@ def summary(cfg: dict) -> str:
         f"  voice         {voice}",
         f"  talking head  {th['character'] + ', ' + th['corner'] if th['enabled'] else 'no'}",
         f"  music         {cfg['music']['mood']}",
+        f"  sound effects {cfg['sound_effects']}",
         f"  captions      {'burned in + .srt' if cfg['captions']['burn_in'] else '.srt only'}",
         f"  outputs       {', '.join(cfg['outputs'])}",
         f"  disclosure    {cfg['disclosure']}",

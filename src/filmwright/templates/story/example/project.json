@@ -8,7 +8,7 @@
  "archetypes": "ABC",
  "stories_per_palette": 1,
  "voice": {"type": "preset", "speaker": "ryan", "style": "Natural, warm and upbeat, like a friendly colleague telling a short story. Clear, even pace."},
- "music": {"mood": "upbeat", "level": -14},
+ "music": {"mood": "upbeat"},
  "talking_head": {"enabled": false, "character": "leo", "corner": "bottom-right"},
  "captions": {"burn_in": true},
  "outputs": ["4k", "hd"],

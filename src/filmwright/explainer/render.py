@@ -26,6 +26,7 @@ FPS = int(os.environ.get("FPS", "60"))
 WORKERS = int(os.environ.get("WORKERS", "5"))
 BPM = 120
 BEAT = 60 / BPM
+MUSIC_DB_UNDER = -20.0     # the score's level under the narration, before ducking (music.level overrides it)
 FONT = paths.FONT_SEMIBOLD
 SIZES = {"4k": (3840, 2160, "15"), "hd": (1920, 1080, "16")}
 
@@ -290,11 +291,12 @@ def soundtrack(build: Path, total: float, cuts: list[float], sfx_cues: list, mus
         mus = score(build / "music.wav", total, sorted(set(c for c in cuts if c > 0)), mood=mood, bpm=music.get("bpm"),
                     snap=bool(music.get("snap", False)))
     fx = None
-    if sfx_cues and music.get("sfx", True) is not False:
+    sounds = "off" if music.get("sfx", True) is False else str(music.get("sound_effects", "subtle"))
+    if sfx_cues and sounds != "off":
         from filmwright.core.sfx import sfx_track
-        fx = sfx_track([(float(t), str(n)) for t, n in sfx_cues], total, build / "sfx.wav", level=0.42)
+        fx = sfx_track([(float(t), str(n)) for t, n in sfx_cues], total, build / "sfx.wav", level=0.42, sounds=sounds)
     from filmwright.core.mix import mix
-    return mix(vo_wav, out or build / "mix.wav", mus, fx, music_db_under=float(music.get("level", -14)),
+    return mix(vo_wav, out or build / "mix.wav", mus, fx, music_db_under=float(music.get("level", MUSIC_DB_UNDER)),
                sfx_db=float(music.get("sfx_db", -3)), seconds=total, stems_dir=build / "stems" if stems else None)
 
 

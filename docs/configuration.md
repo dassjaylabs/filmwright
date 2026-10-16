@@ -18,7 +18,8 @@ default shown. `filmwright options` prints the same choices.
 | `talking_head.corner` | `bottom-right`, `bottom-left` | `bottom-right` | Where the presenter stands |
 | `music.mood` | `upbeat`, `calm`, `corporate`, `inspiring`, `playful`, `epic`, `sad`, `suspense`, `none` | `upbeat` | Original score for the film ([music.md](music.md)) |
 | `music.sync_to_scenes` | `true`, `false` | `true` | Land a downbeat on every scene change |
-| `music.level` | dB | auto | Music level under the narration (auto: about -12 for a score, -22 for an ambient bed) |
+| `music.level` | dB | auto | Music level under the narration, before ducking (auto: -20 for a score, -26 for an ambient bed; e.g. `-16` is louder, `-24` quieter) |
+| `sound_effects` | `subtle`, `full`, `off` | `subtle` | `subtle`: quiet interface sounds only (click, pop, tick, chime). `full` adds whooshes, swishes, risers and impacts on transitions. `off`: none |
 | `captions.burn_in` | `true`, `false` | `true` | Small captions at the bottom of the frame. An `.srt` is always written |
 | `outputs` | list of `4k`, `hd`, `vertical`, `square`, `web`, `gif`, `stems` | `[4k, hd]` | Files to deliver; `stems` comes with at least one video ([below](#stems)) |
 | `disclosure` | `none`, `metadata`, `end-card` | `metadata` | Say that the narration voice is synthetic ([disclosure.md](disclosure.md)) |
