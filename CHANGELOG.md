@@ -10,6 +10,13 @@ First public release.
   Korean and Russian lines all scored a perfect match, and Chinese and Japanese lines over about 3.5 seconds were
   taken for runaway takes. Accent marks are ignored when comparing, and clone samples are transcribed in their own
   language. (Reported by a user.)
+- Sound: a new `sound_effects` setting, `subtle` by default. Films keep the quiet interface sounds (click, pop,
+  tick, chime) and drop the whooshes, swishes, risers and impacts on zooms and scene changes, which distracted from
+  the narration; `full` brings them back, `off` removes all effects (#18).
+- Music: quieter by default in every film type, 20 dB under the narration for a score and 26 dB for an ambient
+  bed (was 12 to 14 dB, and 22). Demo films now bring the narration to a set loudness with a peak limiter, so they
+  play at -16 LUFS like the other film types instead of about -24, and the music level is measured against the
+  real voice. Measured on the examples, the music now sits about 21 dB under the voice (was 9 to 16) (#19).
 - Narration: a take spoken much slower than normal speech (drawn-out words) is now regenerated like a garbled
   one, and the most natural take is kept (#15). The README sample is re-narrated in a plain conversational style
   at a normal pace (#16, from user feedback).

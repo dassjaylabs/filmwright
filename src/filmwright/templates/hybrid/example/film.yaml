@@ -9,7 +9,7 @@ brand:
   colors: {bg: "#0f1222", accent: "#7c5cff", alt: "#22c55e", warm: "#ff8a4c", ink: "#f4f5fb"}
 
 voice: {type: preset, speaker: ryan, style: "Natural, warm and upbeat, like a friendly colleague. Clear, even pace."}
-music: {mood: upbeat, level: -14}
+music: {mood: upbeat}
 talking_head: {enabled: false, character: leo, corner: bottom-right}
 captions: {burn_in: true}
 outputs: [4k, hd]

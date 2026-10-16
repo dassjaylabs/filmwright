@@ -47,7 +47,7 @@ def cmd_new(a: argparse.Namespace) -> int:
     preset = {
         "mode": a.mode, "format": a.format, "title": a.title, "voice": a.voice, "speaker": a.speaker,
         "voice_description": a.voice_description, "voice_sample": a.voice_sample,
-        "talking_head": _bool(a.talking_head), "character": a.character, "music": a.music,
+        "talking_head": _bool(a.talking_head), "character": a.character, "music": a.music, "sound_effects": a.sound_effects,
         "captions": _bool(a.captions), "outputs": a.outputs.split(",") if a.outputs else None,
         "disclosure": a.disclosure, "brand": a.brand,
     }
@@ -130,6 +130,9 @@ def cmd_options(a: argparse.Namespace) -> int:
     print("music.mood:")
     for k, v in CHOICE_HELP["music"].items():
         print(f"  {k:<10} {v.split(': ', 1)[1] if ': ' in v else v}")
+    print("sound_effects:")
+    for k, v in CHOICE_HELP["sound_effects"].items():
+        print(f"  {k:<10} {v.split(': ', 1)[1] if ': ' in v else v}")
     print("outputs:", ", ".join(C.OUTPUTS))
     print("disclosure:", ", ".join(C.DISCLOSURE))
     print("checks.tool_names:", ", ".join(C.CHECK_LEVELS))
@@ -166,6 +169,7 @@ def main(argv: list[str] | None = None) -> int:
     n.add_argument("--talking-head", metavar="yes|no")
     n.add_argument("--character", choices=C.CHARACTERS)
     n.add_argument("--music", choices=C.MOODS)
+    n.add_argument("--sound-effects", choices=C.SOUND_EFFECTS, help="subtle (default), full or off")
     n.add_argument("--captions", metavar="yes|no", help="burn captions into the video")
     n.add_argument("--outputs", help=f"comma list of {', '.join(C.OUTPUTS)}")
     n.add_argument("--disclosure", choices=C.DISCLOSURE)

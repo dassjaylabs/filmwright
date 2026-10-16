@@ -193,7 +193,17 @@ def tts(text: str, out_wav: Path, voice: Any, work: Path) -> None:
     """Narrate one section into a 48 kHz stereo WAV."""
     src = work / (out_wav.stem + ".voice.wav")
     voice.say(text, src)
-    run(["ffmpeg", "-y", "-i", str(src), "-ar", "48000", "-ac", "2", str(out_wav)])
+    # a peak limiter (latency-compensated, so nothing moves in time) lets the speech reach the target level
+    af = f"volume={narration_gain(src):.2f}dB,alimiter=limit=0.84:attack=5:release=50:level=false:latency=true"
+    run(["ffmpeg", "-y", "-i", str(src), "-af", af, "-ar", "48000", "-ac", "2", str(out_wav)])
+
+
+def narration_gain(wav: Path) -> float:
+    """dB that bring a section's narration to NARRATION_LUFS (the voices come out anywhere from about -28 to -18);
+    one constant gain per section, at most +20 dB. tts() limits the peaks after it."""
+    from filmwright.core.mix import lufs
+    level = lufs(wav)
+    return 0.0 if level <= -70 else min(NARRATION_LUFS - level, 20.0)
 
 
 def fit_filter(w: int, h: int) -> str:
@@ -231,14 +241,15 @@ def pick_size(cfg: dict[str, Any], root: Path) -> tuple[int, int]:
     return RESOLUTIONS["1080p"]
 
 
-NARRATION_LUFS = -18.0     # where the narration sits; music levels are relative to it
+NARRATION_LUFS = -15.0     # where each section's narration is brought to (the film lands near -16 LUFS);
+                           # music levels are relative to it
 
 
 def music_plan(cfg: dict[str, Any]) -> dict[str, Any] | None:
     """The `music:` block, normalised. None means no music.
     mood: upbeat | calm | corporate | inspiring | playful | epic | sad | suspense | none (see docs/music.md)
     sync_to_scenes: true composes a score with a downbeat on every section start; false lays a quiet ambient bed.
-    level: dB under the narration (default: -12 for a score, -22 for an ambient bed); level_lufs sets the absolute
+    level: dB under the narration (default: -20 for a score, -26 for an ambient bed); level_lufs sets the absolute
     loudness instead.
     file: your own track instead (looped and faded)."""
     mus = cfg.get("music")
@@ -252,7 +263,7 @@ def music_plan(cfg: dict[str, Any]) -> dict[str, Any] | None:
     if "level_lufs" not in mus:
         level = mus.get("level")
         if level is None:
-            level = -12 if mus["sync_to_scenes"] and not mus.get("file") else -22
+            level = -20 if mus["sync_to_scenes"] and not mus.get("file") else -26
         mus["level_lufs"] = NARRATION_LUFS + float(level)
     return mus
 
@@ -388,6 +399,7 @@ def main() -> int:
     presenter_on = bool(pres) and pres_cfg.get("enabled", True) is not False
     sfx = cfg.get("sfx", True)
     sfx_on, sfx_level = bool(sfx), float(sfx.get("level", 0.5)) if isinstance(sfx, dict) else 0.5
+    sfx_sounds = str(sfx.get("sounds", "subtle")) if isinstance(sfx, dict) else "subtle"   # reel.yaml sound_effects
     trans = cfg.get("transition") or {}
     trans_type = str(trans.get("type", "cut"))
     trans_d = float(trans.get("duration", 0.6)) if trans_type != "cut" else 0.0
@@ -598,7 +610,7 @@ def main() -> int:
             if sfx_on and part.get("sfx", True) is not False:
                 cues_sfx = sfx_cues(part, meta, camera) + [(a0 + 0.05, "pop") for _, a0, _ in ovs] + ([(0.0, "swish")] if i > 0 else [])
                 if cues_sfx:
-                    sfx_wav = sfx_track(cues_sfx, total, work / f"p{i:02d}_sfx.wav", sfx_level)
+                    sfx_wav = sfx_track(cues_sfx, total, work / f"p{i:02d}_sfx.wav", sfx_level, sounds=sfx_sounds)
                     part_sfx = sfx_wav
                     inputs += ["-i", str(sfx_wav)]
                     sfx_idx, nxt = nxt, nxt + 1

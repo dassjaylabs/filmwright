@@ -26,7 +26,7 @@ tagline: Plan less. Do more.
 url: acme-tasks.example
 brand: {colors: {bg: "#0f1222", accent: "#7c5cff", alt: "#22c55e", warm: "#ff8a4c", ink: "#f4f5fb"}}   # or a brand folder
 voice: {type: preset, speaker: ryan}
-music: {mood: upbeat, level: -14}
+music: {mood: upbeat}
 talking_head: {enabled: false, character: leo, corner: bottom-right}
 captions: {burn_in: true}
 outputs: [4k, hd]

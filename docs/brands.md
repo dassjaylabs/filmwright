@@ -55,7 +55,7 @@ wordmark_css: "letter-spacing:.18em;font-weight:600"
 
 | Switch | On means |
 |---|---|
-| `sfx` | soft clicks, whooshes, pops and swishes under the action |
+| `sfx` | soft clicks and pops under the action (whooshes and swishes too with `sound_effects: full`) |
 | `jingle` | a short synthesised sting at the start and end of an episode |
 | `verified_badges` | a "Backend verified" pill over passing `api` steps (useful for QA films, not marketing) |
 | `callouts` | callout labels and key-phrase chips (zooms and spotlights stay on either way) |

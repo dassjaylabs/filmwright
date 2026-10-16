@@ -181,7 +181,7 @@ These come from the runner's event log and need no configuration; turn any off p
 |---|---|---|
 | **Verified badge** | a green pill, "Backend verified · 2 checks passed", for 3 s at every passing `api` step | `verified: false` |
 | **Key caps** | "Esc", "Enter ⏎" bottom-centre at every `press` step | `keys: false` |
-| **Sound effects** | a soft click on clicks, a whoosh as each zoom starts, a chime when a `wait_for` (usually a toast) completes; synthesised, about 25 dB under the voice | `sfx: false` (film or section), `sfx: {level: 0.3}` |
+| **Sound effects** | a soft click on clicks and a chime when a `wait_for` (usually a toast) completes; synthesised, about 25 dB under the voice. With `sound_effects: full` in reel.yaml (or `sfx: {sounds: full}`), also a whoosh as each zoom starts and a swish between sections | `sfx: false` (film or section), `sfx: {level: 0.3}` |
 | **Transitions** | `transition: {type: smoothleft, duration: 0.6}`; any ffmpeg `xfade` type: `dissolve`, `wipeleft`, `slideleft`, `circleopen`, … Default `cut` (with fades to black) | `transition: {type: cut}` |
 | **Chapters** | one per section label, visible in players that show chapters | — |
 | **Poster + teaser** | `<name>-poster.png` and a 10 s `<name>-teaser.gif` from the first zoom moment, for chat and pull requests | `poster: false`, `teaser: false`, `teaser: {seconds: 8, width: 480}` |
@@ -213,7 +213,7 @@ music: {file: music/bed.mp3}                   # your own royalty-free track (lo
 Moods: `upbeat`, `calm`, `corporate`, `inspiring`, `playful`, `epic`, `sad`, `suspense` (docs/music.md). The music is
 synthesised on your machine: no samples, no model, nothing to license.
 
-`level` is how far under the narration it sits, in dB (default -22, so `level: -24` is a little quieter); `level_lufs`
+`level` is how far under the narration it sits, in dB (default -20 for a score and -26 for an ambient bed, so `level: -24` is a little quieter than the score default); `level_lufs`
 sets the absolute loudness instead. It ducks further while someone speaks (`duck: false` turns that off). The
 narration-only `-voiceover.m4a` never has music in it.
 

@@ -13,7 +13,7 @@ see [film.md](film.md)).
 music:
   mood: upbeat          # upbeat | calm | corporate | inspiring | playful | epic | sad | suspense | none
   sync_to_scenes: true  # a new section on every scene change
-  level: -12            # optional: dB under the narration (auto: -12 for a score, -22 for an ambient bed)
+  level: -20            # optional: dB under the narration (auto: -20 for a score, -26 for an ambient bed)
 ```
 
 ## Moods
@@ -72,3 +72,11 @@ swing). The composer needs nothing else. Add it to the table above, and run `pyt
 
 `filmwright.core.sfx` synthesises the small sounds the pipelines use (click, whoosh, chime, pop, tick, swish, riser,
 impact, a short sting in and out). `python -m filmwright.core.sfx out.wav whoosh` renders one to listen to.
+
+`sound_effects` in `reel.yaml` picks which ones a film gets:
+
+| setting | sounds |
+|---|---|
+| `subtle` (default) | click, pop, tick and chime: quiet interface sounds that follow the action |
+| `full` | also whoosh, swish, riser and impact on zooms and scene changes |
+| `off` | none |

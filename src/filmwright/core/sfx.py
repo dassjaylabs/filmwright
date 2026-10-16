@@ -161,17 +161,32 @@ def impact() -> np.ndarray:
     return 0.5 * out / np.abs(out).max()
 
 
+# `sound_effects` in reel.yaml: which sounds a film gets. "subtle" (the default) keeps the quiet interface sounds and
+# drops the transition sounds (whoosh, swish, riser, impact), which compete with the narration.
+TRANSITION_SOUNDS = frozenset({"whoosh", "swish", "riser", "impact"})
+EFFECT_SETS = ("subtle", "full", "off")
+
+
+def allowed(name: str, sounds: str = "subtle") -> bool:
+    """Whether a cue named `name` plays under the `sounds` setting."""
+    if sounds == "off":
+        return False
+    return sounds == "full" or name not in TRANSITION_SOUNDS
+
+
 SOUNDS = {"click": click, "riser": riser, "impact": impact, "whoosh": whoosh, "chime": chime, "jingle_in": jingle_in, "jingle_out": jingle_out, "sparkle": sparkle,
           "pop": pop, "tick": tick, "swish": swish}
 
 
-def sfx_track(cues: list[tuple[float, str]], seconds: float, out_wav: Path, level: float = 0.5) -> Path:
-    """Place sounds at times (seconds) on a stereo track of `seconds`; returns the WAV path."""
+def sfx_track(cues: list[tuple[float, str]], seconds: float, out_wav: Path, level: float = 0.5,
+              sounds: str = "subtle") -> Path:
+    """Place sounds at times (seconds) on a stereo track of `seconds`; returns the WAV path. `sounds` is the
+    reel's `sound_effects` setting: "subtle" leaves out the transition sounds, "off" leaves out everything."""
     n = int(seconds * RATE) + RATE
     mix = np.zeros(n)
     cache = {}
     for t, name in cues:
-        if name not in SOUNDS or t < 0:
+        if name not in SOUNDS or t < 0 or not allowed(name, sounds):
             continue
         s = cache.setdefault(name, SOUNDS[name]())
         i = int(t * RATE)
@@ -195,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("sound", choices=list(SOUNDS))
     a = ap.parse_args(argv)
     seconds = len(SOUNDS[a.sound]()) / RATE + 0.2
-    print(sfx_track([(0.1, a.sound)], seconds, a.out))
+    print(sfx_track([(0.1, a.sound)], seconds, a.out, sounds="full"))
     return 0
 
 
