@@ -13,7 +13,7 @@ from typing import Any
 import yaml
 
 MODES = ("demo", "explainer", "both")
-VOICE_TYPES = ("preset", "described", "clone", "system")
+VOICE_TYPES = ("preset", "library", "described", "clone", "system")
 PRESET_SPEAKERS = ("ryan", "aiden", "serena", "vivian", "dylan", "eric", "uncle_fu", "ono_anna", "sohee")
 CHARACTERS = ("leo", "leo-light", "leo-stubble", "sam", "ana", "lee", "maya", "raj", "kit", "jo")
 CORNERS = ("bottom-right", "bottom-left")
@@ -29,7 +29,7 @@ DEFAULTS: dict[str, Any] = {
     "mode": "demo",
     "title": "",
     "brand": "example",
-    "voice": {"type": "preset", "speaker": "ryan", "description": "", "sample": "", "style": "", "language": "English"},
+    "voice": {"type": "preset", "speaker": "ryan", "name": "", "description": "", "sample": "", "style": "", "language": "English"},
     "talking_head": {"enabled": False, "character": "leo", "corner": "bottom-right"},
     "music": {"mood": "upbeat", "sync_to_scenes": True, "level": None},
     "sound_effects": "subtle",
@@ -66,6 +66,10 @@ def validate(cfg: dict) -> list[str]:
     _one_of(e, "voice.type", v.get("type"), VOICE_TYPES)
     if v.get("type") == "described" and not str(v.get("description") or "").strip():
         e.append("voice.description: a described voice needs a description, e.g. \"Calm, friendly narrator in her thirties\"")
+    if v.get("type") == "library":
+        from filmwright.core.voice.library import names
+        if v.get("name") not in names():
+            e.append(f"voice.name: a library voice needs a name, one of: {', '.join(names())}")
     if v.get("type") == "clone" and not v.get("sample"):
         e.append("voice.sample: a cloned voice needs a sample recording (filmwright voice record) and a consent record")
     th = cfg["talking_head"]

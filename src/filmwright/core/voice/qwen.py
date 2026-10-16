@@ -179,7 +179,7 @@ class QwenVoice:
     def __init__(self, mode: str = "custom", *, ref_audio: Path | None = None, ref_text: str | None = None,
                  instruct: str | None = None, speaker: str | None = None, language: str = "english",
                  seed: int = 7, temperature: float = DEFAULT_TEMPERATURE, verify: bool = True,
-                 cache: Path | None = None, log: Any = print):
+                 cache: Path | None = None, log: Any = print, label: str | None = None):
         if mode not in MODELS:
             raise ValueError(f"mode must be one of {', '.join(MODELS)} (got {mode!r})")
         if mode == "custom" and not speaker:
@@ -198,7 +198,7 @@ class QwenVoice:
                                      "(python -m filmwright.core.voice.clone prepare writes it)")
                 ref_text = txt.read_text().strip()
         require_mlx()
-        self.mode, self.instruct, self.speaker = mode, instruct, speaker
+        self.mode, self.instruct, self.speaker, self.label = mode, instruct, speaker, label
         self.kind = {"custom": "preset", "design": "described", "clone": "clone"}[mode]
         self.language, self.seed, self.temperature, self.verify = language, seed, temperature, verify
         self.cache, self.log = cache, log
@@ -211,7 +211,7 @@ class QwenVoice:
 
     @property
     def name(self) -> str:
-        return {"custom": f"preset speaker {self.speaker}", "design": "described voice", "clone": "cloned voice"}[self.mode]
+        return self.label or {"custom": f"preset speaker {self.speaker}", "design": "described voice", "clone": "cloned voice"}[self.mode]
 
     # --- models -------------------------------------------------------------------------
 

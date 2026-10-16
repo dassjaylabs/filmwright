@@ -18,6 +18,7 @@ voice:
 | type | what you get | needs |
 |---|---|---|
 | `preset` (default) | a built-in speaker: `ryan`, `aiden` (native English); `serena`, `vivian`, `dylan`, `eric`, `uncle_fu` (Chinese-native), `ono_anna` (Japanese), `sohee` (Korean). The non-English speakers read English with an accent. | Apple Silicon, `filmwright setup --voice preset` (5.8 GB, once) |
+| `library` | a ready-made narrator picked by name: `nora`, `james`, `olivia`, `henry`, `priya`, `marcus`, `ethan` ([below](#library-voices)) | Apple Silicon, `filmwright setup --voice library` (5.8 GB, once) |
 | `described` | a voice designed from a sentence, e.g. "Calm, friendly narrator in her thirties, British" | Apple Silicon, `filmwright setup --voice described` (10 GB, once) |
 | `clone` | a voice cloned from a short recording of a real person, **with their consent** | Apple Silicon, `filmwright setup --voice clone` (5.8 GB, once), a consented sample |
 | `system` | espeak-ng: robotic, but it runs anywhere | `filmwright setup` |
@@ -50,6 +51,33 @@ python -m filmwright.core.voice preview --type preset --speaker aiden --style "W
 python -m filmwright.core.voice preview --type described --description "Calm, friendly narrator in her thirties" --play
 python -m filmwright.core.voice speakers
 ```
+
+## Library voices
+
+Ready-made narrators with a plain, natural delivery, designed for product and explainer films:
+
+```yaml
+voice: {type: library, name: olivia}
+```
+
+| name | voice |
+|---|---|
+| `nora` | American woman, 30s, warm and clear product guide |
+| `james` | American man, 30s, relaxed and conversational |
+| `olivia` | British woman, 30s, calm and polished presenter |
+| `henry` | British man, 40s, steady and trustworthy |
+| `priya` | Indian English woman, 30s, bright and clear explainer |
+| `marcus` | American man, 40s, deep and assured (B2B) |
+| `ethan` | American man, late 20s, bright and friendly (launches) |
+
+Each was designed once from a written description with Qwen3-TTS VoiceDesign and ships as a short reference clip
+(`src/filmwright/assets/voices/`). A film clones that clip with the Base model, so the voice sounds the same on
+every machine and the VoiceDesign model isn't needed. The voices are synthetic and not modelled on any real
+person, so they need no consent record. Only the bundled clips, verified by checksum, are treated that way: a
+recording of a real person always goes through `clone` and its consent check. `scripts/build_voice_library.py`
+rebuilds the library from `library.json`.
+
+Hear one with `filmwright voice preview --type library --name olivia --play`.
 
 ## Cloned voices and consent
 

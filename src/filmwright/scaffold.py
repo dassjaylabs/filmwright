@@ -44,7 +44,7 @@ def next_steps(cfg: dict, dest: Path) -> list[str]:
             'filmwright voice clone record --speaker "<full name>"   # records, then asks the speaker to consent',
             "filmwright voice clone preview --play                   # hear the cloned voice",
         ]
-    elif cfg["voice"]["type"] in ("preset", "described"):
+    elif cfg["voice"]["type"] in ("preset", "library", "described"):
         steps.append(f"filmwright setup --voice {cfg['voice']['type']}       # one-time voice model download (Apple Silicon)")
     mode = cfg["mode"]
     if mode == "demo":

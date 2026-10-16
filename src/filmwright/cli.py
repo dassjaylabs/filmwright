@@ -45,7 +45,7 @@ def cmd_new(a: argparse.Namespace) -> int:
         print(f"{d / 'reel.yaml'} already exists (use --force to replace it).", file=sys.stderr)
         return 1
     preset = {
-        "mode": a.mode, "format": a.format, "title": a.title, "voice": a.voice, "speaker": a.speaker,
+        "mode": a.mode, "format": a.format, "title": a.title, "voice": a.voice, "speaker": a.speaker, "voice_name": a.voice_name,
         "voice_description": a.voice_description, "voice_sample": a.voice_sample,
         "talking_head": _bool(a.talking_head), "character": a.character, "music": a.music, "sound_effects": a.sound_effects,
         "captions": _bool(a.captions), "outputs": a.outputs.split(",") if a.outputs else None,
@@ -125,6 +125,10 @@ def cmd_options(a: argparse.Namespace) -> int:
     for k, v in CHOICE_HELP["voice"].items():
         print(f"  {k:<10} {v.split(': ', 1)[1]}")
     print("voice.speaker (preset):", ", ".join(C.PRESET_SPEAKERS))
+    from filmwright.core.voice.library import voices
+    print("voice.name (library):")
+    for k, v in voices().items():
+        print(f"  {k:<10} {v['label'].split(': ', 1)[1]}")
     print("talking_head.character:", ", ".join(C.CHARACTERS))
     print("talking_head.corner:", ", ".join(C.CORNERS))
     print("music.mood:")
@@ -164,6 +168,7 @@ def main(argv: list[str] | None = None) -> int:
     n.add_argument("--title")
     n.add_argument("--voice", choices=C.VOICE_TYPES)
     n.add_argument("--speaker", help="preset speaker name")
+    n.add_argument("--voice-name", help="library voice name (filmwright options lists them)")
     n.add_argument("--voice-description", help="described voice, in words")
     n.add_argument("--voice-sample", help="cloned voice: path to the sample recording")
     n.add_argument("--talking-head", metavar="yes|no")
@@ -185,7 +190,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("doctor", help="what this machine can run")
     s = sub.add_parser("setup", help="install what films need")
     s.add_argument("--check", action="store_true", help="report only, change nothing")
-    s.add_argument("--voice", choices=("preset", "described", "clone", "all"), help="also install the neural voice models")
+    s.add_argument("--voice", choices=("preset", "library", "described", "clone", "all"), help="also install the neural voice models")
     sub.add_parser("options", help="every choice reel.yaml accepts")
     sub.add_parser("voice", help="voice preview and cloning tools (filmwright voice --help)", add_help=False)
     sub.add_parser("music", help="render a mood track (filmwright music --help)", add_help=False)

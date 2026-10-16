@@ -6,7 +6,7 @@ from filmwright.core.voice import VOICE_TYPES, EspeakVoice, make_voice, mlx_stat
 
 
 def test_voice_types():
-    assert VOICE_TYPES == ("preset", "described", "clone", "system")
+    assert VOICE_TYPES == ("preset", "library", "described", "clone", "system")
 
 
 def test_unknown_type_is_rejected(tmp_path):
