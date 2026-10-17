@@ -38,9 +38,10 @@ from filmwright.explainer import render as R
 
 TEMPLATE = paths.TEMPLATES / "hybrid" / "scenes.html"
 EXAMPLE = paths.TEMPLATES / "hybrid" / "example" / "film.yaml"
-SCENES = ("title", "statement", "steps", "stat", "outro")
+SCENES = ("title", "statement", "headline", "steps", "stat", "chart", "device", "ui", "outro")
 TEMPO, FIRST, GAP, TAIL = 1.0, 0.4, 0.5, 0.6
-MIN_HOLD = {"title": 3.2, "statement": 2.6, "steps": 3.6, "stat": 3.0, "outro": 4.2, "clip": 2.0}
+MIN_HOLD = {"title": 3.2, "statement": 2.6, "headline": 2.8, "steps": 3.6, "stat": 3.0, "chart": 4.0, "device": 3.6,
+            "ui": 5.0, "outro": 4.2, "clip": 2.0}
 FRAME = {"x": 200, "y": 150, "w": 1520, "h": 855}     # where a recording sits on the 1920x1080 page
 
 
@@ -80,6 +81,13 @@ class Film:
             s["kind"] = str(s.get("scene", "statement"))
             if s["kind"] not in SCENES:
                 raise SystemExit(f"segment {i + 1}: unknown scene {s['kind']!r} (choose from {', '.join(SCENES)} or give `clip:`)")
+            for k in ("image", "phone_image"):              # device screens: screenshots next to film.yaml
+                if s.get(k) and "://" not in str(s[k]):
+                    img = Path(str(s[k])).expanduser()
+                    img = img if img.is_absolute() else self.root / img
+                    if not img.is_file():
+                        raise SystemExit(f"segment {i + 1}: {k} {s[k]!r} not found")
+                    s[k] = img.resolve().as_uri()
         s["key"] = f"s{i + 1:02d}"
         return s
 
