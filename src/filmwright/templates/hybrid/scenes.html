@@ -148,6 +148,297 @@ const KINDS = {
   },
 };
 
+/* ---- richer scenes: chart, headline (kinetic type), device frames, ui (product UI with a cursor) ---------------- */
+const DEFS = document.querySelector("#root defs");
+let gid = 0;
+function grad(stops, x2 = 0, y2 = 1) {
+  const id = "g" + (++gid), lg = S("linearGradient", {id, x1: 0, y1: 0, x2, y2}, DEFS);
+  stops.forEach(([o, c, a = 1]) => S("stop", {offset: o, "stop-color": c, "stop-opacity": a}, lg));
+  return `url(#${id})`;
+}
+function blurFilter(sd) { const id = "b" + (++gid), f = S("filter", {id, x: "-30%", y: "-30%", width: "160%", height: "160%"}, DEFS); S("feGaussianBlur", {stdDeviation: sd}, f); return `url(#${id})`; }
+function label(parent, x, y, str, size, col, weight = 600, anchor = "start", family = F.body) {
+  return S("text", {x, y, "text-anchor": anchor, "font-family": family, "font-weight": weight, "font-size": size, fill: col}, parent, str);
+}
+function drawLine(el, t, d = .8, ease = "power2.inOut") {
+  const L = el.getTotalLength(); motion.set(el, {strokeDasharray: L, strokeDashoffset: L});
+  tl.to(el, {strokeDashoffset: 0, duration: d, ease}, t);
+}
+function rise(el, t, d = .5, dy = 24) { motion.set(el, {opacity: 0, y: dy}); tl.to(el, {opacity: 1, y: 0, duration: d, ease: "power3.out"}, t); }
+function heading(g, s, y = 190) {
+  if (s.title) { const t = label(g, 960, y, s.title, 60, "#FFFFFF", 700, "middle", F.disp); fit(t, 1500); rise(t, s.start + .15); }
+  if (s.sub) { const t = label(g, 960, y + 58, s.sub, 30, C.muted, 500, "middle"); fit(t, 1400); rise(t, s.start + .4); }
+}
+const nice = v => Math.abs(v) >= 1000 ? Math.round(v).toLocaleString("en-US") : (Math.round(v * 10) / 10).toString();
+
+Object.assign(KINDS, {
+  chart(g, s) {
+    const data = (s.data || [{label: "Jan", value: 12}, {label: "Feb", value: 18}, {label: "Mar", value: 26}, {label: "Apr", value: 41}]).slice(0, 8);
+    const kind = s.type || "bar", n = data.length, unit = s.unit || "", pre = s.prefix || "";
+    const hi = s.highlight == null ? n - 1 : (typeof s.highlight === "number" ? s.highlight : data.findIndex(d => d.label === s.highlight));
+    heading(g, s, 170);
+    const X0 = 360, X1 = 1560, Y0 = 850, YT = s.title ? 340 : 260, H = Y0 - YT;
+    const peak = Math.max(...data.map(d => +d.value)) * 1.08 || 1;
+    const mag = Math.pow(10, Math.floor(Math.log10(peak / 4))), step = [1, 2, 2.5, 3, 4, 5, 10].map(m => m * mag).find(v => v * 4 >= peak);
+    const max = step * 4;
+    const card = S("rect", {x: X0 - 120, y: YT - 60, width: X1 - X0 + 200, height: H + 150, rx: 28, fill: C.panel, stroke: C.line, "stroke-width": 1.5, filter: "url(#softdark)"}, g);
+    rise(card, s.start + .05, .6, 30);
+    for (let k = 0; k <= 4; k++) {
+      const y = Y0 - k / 4 * H;
+      const gl = S("path", {d: `M${X0} ${y} H${X1}`, stroke: k ? mix(C.panel, C.text, .12) : mix(C.panel, C.text, .3), "stroke-width": k ? 1.5 : 2.5, fill: "none"}, g);
+      drawLine(gl, s.start + .25 + k * .05, .7);
+      const v = label(g, X0 - 24, y + 8, pre + nice(step * k) + unit, 22, C.muted, 500, "end"); rise(v, s.start + .35 + k * .05, .4, 0);
+    }
+    const slot = (X1 - X0) / n, bw = Math.min(150, slot * .56);
+    const px = i => X0 + slot * (i + .5), py = v => Y0 - (+v / max) * H;
+    const t0 = s.start + .6, per = Math.min(.18, 1.2 / n);
+    const hiFill = grad([[0, C.accent2], [1, C.accent]]), loFill = grad([[0, mix(C.panel2, C.accent, .45)], [1, mix(C.panel2, C.accent, .18)]]);
+    const vals = [];
+    data.forEach((d, i) => {
+      const xl = label(g, px(i), Y0 + 44, d.label, 24, i === hi ? C.text : C.muted, i === hi ? 700 : 500, "middle"); rise(xl, t0 + i * per, .4, 10);
+      const vl = label(g, px(i), py(d.value) - 22, pre + "0" + unit, 28, i === hi ? "#FFFFFF" : C.text, 700, "middle", F.disp);
+      vals.push(vl); motion.set(vl, {opacity: 0});
+      const o = {v: 0}, at = t0 + i * per;
+      tl.to(vl, {opacity: 1, duration: .3}, at + .25);
+      tl.to(o, {v: +d.value, duration: .8, ease: "power3.out", onUpdate() { vl.textContent = pre + nice(o.v) + unit; }}, at);
+      if (kind === "bar") {
+        const b = S("rect", {x: px(i) - bw / 2, y: py(d.value), width: bw, height: Y0 - py(d.value), rx: 12, fill: i === hi ? hiFill : loFill}, g);
+        motion.set(b, {scaleY: 0, svgOrigin: `${px(i)} ${Y0}`});
+        tl.to(b, {scaleY: 1, duration: .8, ease: "power3.out"}, at);
+        motion.set(vl, {y: Y0 - py(d.value)}); tl.to(vl, {y: 0, duration: .8, ease: "power3.out"}, at);
+        if (i === hi) { const glow = S("rect", {x: px(i) - bw / 2 - 10, y: py(d.value) - 10, width: bw + 20, height: Y0 - py(d.value) + 10, rx: 18, fill: C.accent, opacity: 0, filter: blurFilter(16)}, g); g.insertBefore(glow, b); tl.to(glow, {opacity: .45, duration: .6}, at + .7); }
+      }
+      cue(at, "tick");
+    });
+    if (kind === "line") {
+      const pts = data.map((d, i) => [px(i), py(d.value)]);
+      const dpath = pts.map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ");
+      const area = S("path", {d: `${dpath} L${pts[n - 1][0]} ${Y0} L${pts[0][0]} ${Y0} Z`, fill: grad([[0, C.accent, .35], [1, C.accent, 0]])}, g);
+      motion.set(area, {opacity: 0}); tl.to(area, {opacity: 1, duration: .8}, t0 + .6);
+      const ln = S("path", {d: dpath, stroke: C.accent2, "stroke-width": 7, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round"}, g);
+      drawLine(ln, t0, Math.max(.9, n * per + .4), "power2.inOut");
+      pts.forEach((p, i) => { const dot = S("circle", {cx: p[0], cy: p[1], r: i === hi ? 13 : 9, fill: i === hi ? "#FFFFFF" : C.accent2, stroke: C.accent, "stroke-width": 4}, g); motion.set(dot, {scale: 0, svgOrigin: `${p[0]} ${p[1]}`}); tl.to(dot, {scale: 1, duration: .35, ease: "back.out(2.5)"}, t0 + i * per + .2); });
+      const ring = S("circle", {cx: pts[hi][0], cy: pts[hi][1], r: 13, fill: "none", stroke: C.accent2, "stroke-width": 3}, g);
+      motion.set(ring, {opacity: 0}); const rt = t0 + n * per + .5;
+      [0, 1.3].forEach(d => { tl.set(ring, {attr: {r: 13}, opacity: .9}, rt + d); tl.to(ring, {attr: {r: 46}, opacity: 0, duration: 1.2, ease: "power2.out"}, rt + d); });
+      vals.forEach((v, i) => v.setAttribute("y", py(data[i].value) - 30));
+    }
+    if (s.note) {
+      const nx = px(hi), ny = py(data[hi].value) - 96, c = S("g", {}, g);
+      const r = S("rect", {x: nx - 120, y: ny - 44, width: 240, height: 62, rx: 31, fill: C.alt}, c);
+      const t = label(c, nx, ny - 3, s.note, 28, "#0b1220", 700, "middle", F.disp);
+      const w = Math.max(160, t.getComputedTextLength() + 56); r.setAttribute("width", w); r.setAttribute("x", nx - w / 2);
+      S("path", {d: `M${nx - 12} ${ny + 18} L${nx} ${ny + 32} L${nx + 12} ${ny + 18} Z`, fill: C.alt}, c);
+      const at = Q(t0 + n * per + .7);
+      motion.set(c, {opacity: 0, scale: .6, svgOrigin: `${nx} ${ny + 30}`}); tl.to(c, {opacity: 1, scale: 1, duration: .45, ease: "back.out(2.2)"}, at); cue(at, "pop");
+    }
+  },
+
+  headline(g, s) {
+    // kinetic type: words arrive in the rhythm of the line; *starred* words are marked in the accent colour
+    const lines = String(s.text || "Plan less. *Do more.*").split("\n");
+    const size = s.size || (lines.length > 2 ? 92 : 112), lh = size * 1.18;
+    const all = [];
+    const top = 540 - (lines.length - 1) * lh / 2 - (s.sub ? 40 : 0);
+    lines.forEach((ln, li) => {
+      const y = top + li * lh + size * .35, row = S("g", {}, g), items = [];
+      let x = 0;
+      const space = (() => { const t = label(row, 0, 0, "a a", size, "#fff", 700, "start", F.disp); const w2 = t.getComputedTextLength(); t.textContent = "aa"; const w1 = t.getComputedTextLength(); t.remove(); return w2 - w1; })();
+      ln.split(/\s+/).filter(Boolean).forEach(raw => {
+        const em = /^\*.*\*[.,!?:;]?$/.test(raw) || /^\*/.test(raw) && raw.endsWith("*");
+        const word = raw.replace(/\*/g, "");
+        const t = label(row, x, y, word, size, em ? C.accent2 : "#FFFFFF", 700, "start", F.disp);
+        const w = t.getComputedTextLength();
+        items.push({t, x, w, em}); x += w + space;
+      });
+      const width = x - space, off = 960 - width / 2;
+      items.forEach(it => {
+        it.t.setAttribute("x", it.x + off);
+        if (it.em) {
+          const m = S("rect", {x: it.x + off - 10, y: y - size * .32, width: it.w + 20, height: size * .42, rx: 8, fill: C.accent, opacity: .28}, row);
+          row.insertBefore(m, it.t); it.mark = m;
+        }
+        all.push(it);
+      });
+    });
+    const span = Math.min(s.dur * .55, all.length * .32), t0 = s.start + .25;
+    all.forEach((it, i) => {
+      const at = t0 + (all.length > 1 ? i / (all.length - 1) : 0) * span;
+      motion.set(it.t, {opacity: 0, y: size * .45});
+      tl.to(it.t, {opacity: 1, y: 0, duration: .5, ease: "power4.out"}, at);
+      if (it.mark) { motion.set(it.mark, {scaleX: 0, svgOrigin: `${+it.mark.getAttribute("x")} 0`}); tl.to(it.mark, {scaleX: 1, duration: .45, ease: "power3.inOut"}, at + .3); }
+    });
+    if (s.sub) { const sub = label(g, 960, top + lines.length * lh + 30, s.sub, 36, C.muted, 500, "middle"); fit(sub, 1500); rise(sub, t0 + span + .3); }
+    tl.fromTo(g, {scale: 1}, {scale: 1.035, svgOrigin: "960 540", duration: s.dur, ease: "none"}, s.start);   // a slow push-in keeps type alive
+  },
+
+  device(g, s) {
+    // a laptop and a phone with depth; screens show your screenshots (image, phone_image) or a generated app
+    const which = s.device || "both", laptop = which !== "phone", phone = which !== "laptop";
+    heading(g, s, 150);
+    const LX = phone && laptop ? 250 : 410, LY = s.title ? 290 : 240, LW = 1100, LH = 640;
+    const shadow = blurFilter(26);
+    const scene = S("g", {}, g);
+    const app = (parent, x, y, w, h, mobile) => {     // a generated, on-brand dashboard
+      const a = S("g", {}, parent);
+      S("rect", {x, y, width: w, height: h, fill: mix(BC.bg, "#ffffff", .03)}, a);
+      S("rect", {x, y, width: w, height: mobile ? h * .09 : h * .075, fill: C.panel2}, a);
+      label(a, x + w * .04, y + (mobile ? h * .06 : h * .05), BR.wordmark, mobile ? 18 : 20, C.text, 700, "start", F.disp);
+      const cards = [];
+      if (!mobile) {
+        S("rect", {x, y: y + h * .075, width: w * .17, height: h * .925, fill: C.panel}, a);
+        [0, 1, 2, 3, 4].forEach(k => S("rect", {x: x + w * .025, y: y + h * (.14 + k * .08), width: w * .12, height: h * .035, rx: 6, fill: k ? mix(C.panel, C.text, .1) : C.accent}, a));
+        [0, 1, 2].forEach(k => { const c = S("g", {}, a); S("rect", {x: x + w * (.2 + k * .26), y: y + h * .13, width: w * .24, height: h * .2, rx: 12, fill: C.panel2, stroke: C.line}, c);
+          label(c, x + w * (.215 + k * .26), y + h * .2, ["Tasks", "Done", "Hours saved"][k], 16, C.muted, 600);
+          label(c, x + w * (.215 + k * .26), y + h * .29, ["128", "96", "11 h"][k], 34, "#fff", 700, "start", F.disp); cards.push(c); });
+        const ch = S("g", {}, a); S("rect", {x: x + w * .2, y: y + h * .38, width: w * .76, height: h * .55, rx: 12, fill: C.panel2, stroke: C.line}, ch);
+        [.35, .5, .42, .62, .55, .78, .9].forEach((v, k) => { const bx = x + w * (.24 + k * .1), bh = h * .42 * v; const b = S("rect", {x: bx, y: y + h * .9 - bh, width: w * .06, height: bh, rx: 6, fill: k === 6 ? C.accent : mix(C.panel2, C.accent, .4)}, ch);
+          motion.set(b, {scaleY: 0, svgOrigin: `${bx} ${y + h * .9}`}); cards.push({bar: b}); });
+        cards.push(ch);
+      } else {
+        [0, 1, 2, 3, 4].forEach(k => { const c = S("g", {}, a); S("rect", {x: x + w * .06, y: y + h * (.13 + k * .155), width: w * .88, height: h * .13, rx: 14, fill: C.panel2, stroke: C.line}, c);
+          S("circle", {cx: x + w * .17, cy: y + h * (.195 + k * .155), r: w * .045, fill: [C.accent, C.alt, C.warm][k % 3]}, c);
+          S("rect", {x: x + w * .27, y: y + h * (.17 + k * .155), width: w * (.4 + (k % 2) * .15), height: h * .02, rx: 4, fill: mix(C.panel2, C.text, .5)}, c);
+          S("rect", {x: x + w * .27, y: y + h * (.205 + k * .155), width: w * .3, height: h * .015, rx: 4, fill: mix(C.panel2, C.text, .22)}, c); cards.push(c); });
+      }
+      return cards;
+    };
+    const screen = (parent, x, y, w, h, img, mobile, r) => {
+      const clipId = "c" + (++gid), cp = S("clipPath", {id: clipId}, DEFS); S("rect", {x, y, width: w, height: h, rx: r}, cp);
+      const sc = S("g", {"clip-path": `url(#${clipId})`}, parent);
+      let parts = [];
+      if (img) S("image", {href: img, x, y, width: w, height: h, preserveAspectRatio: "xMidYMin slice"}, sc);
+      else parts = app(sc, x, y, w, h, mobile);
+      S("rect", {x, y, width: w, height: h, fill: grad([[0, "#ffffff", .1], [.45, "#ffffff", 0]], 1, 1)}, sc);   // glass
+      return parts;
+    };
+    let lap = null, ph = null, lparts = [], pparts = [];
+    if (laptop) {
+      lap = S("g", {}, scene);
+      S("ellipse", {cx: LX + LW / 2, cy: LY + LH + 70, rx: LW * .55, ry: 28, fill: "#000", opacity: .55, filter: shadow}, lap);
+      S("rect", {x: LX, y: LY, width: LW, height: LH, rx: 26, fill: "#0a0c16", stroke: mix("#0a0c16", "#ffffff", .22), "stroke-width": 3}, lap);
+      S("circle", {cx: LX + LW / 2, cy: LY + 15, r: 4, fill: "#2a2f45"}, lap);
+      lparts = screen(lap, LX + 22, LY + 30, LW - 44, LH - 52, s.image, false, 8);
+      S("path", {d: `M${LX - 70} ${LY + LH + 6} H${LX + LW + 70} L${LX + LW + 40} ${LY + LH + 44} Q${LX + LW / 2} ${LY + LH + 56} ${LX - 40} ${LY + LH + 44} Z`, fill: grad([[0, "#c9cede"], [1, "#7c8296"]])}, lap);
+      S("rect", {x: LX + LW / 2 - 90, y: LY + LH + 6, width: 180, height: 10, rx: 5, fill: "#9aa0b4"}, lap);
+    }
+    if (phone) {
+      const PW = 330, PH = 680, PX = laptop ? 1290 : 795, PY = laptop ? LY + 120 : LY - 10;
+      ph = S("g", {}, scene);
+      S("ellipse", {cx: PX + PW / 2, cy: PY + PH + 26, rx: PW * .55, ry: 18, fill: "#000", opacity: .5, filter: shadow}, ph);
+      S("rect", {x: PX, y: PY, width: PW, height: PH, rx: 54, fill: "#0a0c16", stroke: mix("#0a0c16", "#ffffff", .3), "stroke-width": 3}, ph);
+      pparts = screen(ph, PX + 14, PY + 14, PW - 28, PH - 28, s.phone_image, true, 42);
+      S("rect", {x: PX + PW / 2 - 54, y: PY + 28, width: 108, height: 30, rx: 15, fill: "#05060c"}, ph);
+      motion.set(ph, {svgOrigin: `${PX + PW / 2} ${PY + PH}`});
+    }
+    const t0 = s.start + .15;
+    if (lap) { motion.set(lap, {opacity: 0, y: 90}); tl.to(lap, {opacity: 1, y: 0, duration: .9, ease: "power3.out"}, t0); tl.to(lap, {x: -14, duration: s.dur, ease: "sine.inOut"}, t0); }
+    if (ph) { motion.set(ph, {opacity: 0, x: 160, rotation: 8}); tl.to(ph, {opacity: 1, x: 0, rotation: 3, duration: 1.0, ease: "power3.out"}, t0 + (lap ? .5 : 0)); tl.to(ph, {y: -12, duration: s.dur, ease: "sine.inOut"}, t0 + .5); }
+    [...lparts, ...pparts].forEach((p, k) => {
+      const at = t0 + .7 + k * .07;
+      if (p.bar) tl.to(p.bar, {scaleY: 1, duration: .6, ease: "power3.out"}, at + .3);
+      else { motion.set(p, {opacity: 0, y: 14}); tl.to(p, {opacity: 1, y: 0, duration: .4, ease: "power2.out"}, at); }
+    });
+  },
+
+  ui(g, s) {
+    // a product screen and a cursor that does what the narration says: click, type, add, tick, toast
+    const WX = 250, WY = 120, WW = 1420, WH = 840, SB = 270;
+    const win = S("g", {}, g);
+    S("rect", {x: WX, y: WY, width: WW, height: WH, rx: 26, fill: mix(BC.bg, "#ffffff", .035), stroke: C.line, "stroke-width": 2, filter: "url(#softdark)"}, win);
+    S("path", {d: `M${WX} ${WY + 26} Q${WX} ${WY} ${WX + 26} ${WY} H${WX + WW - 26} Q${WX + WW} ${WY} ${WX + WW} ${WY + 26} V${WY + 58} H${WX} Z`, fill: C.panel2}, win);
+    [0, 1, 2].forEach(k => S("circle", {cx: WX + 30 + k * 26, cy: WY + 29, r: 8, fill: ["#FF6B5B", "#FFC247", C.alt][k]}, win));
+    label(win, WX + WW / 2, WY + 37, s.app || BR.wordmark, 20, C.muted, 600, "middle");
+    S("rect", {x: WX, y: WY + 58, width: SB, height: WH - 58, fill: C.panel}, win);
+    S("path", {d: `M${WX} ${WY + WH - 26} Q${WX} ${WY + WH} ${WX + 26} ${WY + WH} H${WX + SB} V${WY + 58} H${WX} Z`, fill: C.panel}, win);
+    const nav = s.nav || ["Inbox", "Today", "Projects", "Reports", "Settings"];
+    nav.forEach((n2, k) => { const y = WY + 110 + k * 64;
+      if (k === (s.active || 1)) S("rect", {x: WX + 16, y: y - 32, width: SB - 32, height: 48, rx: 12, fill: mix(C.panel, C.accent, .28)}, win);
+      S("rect", {x: WX + 34, y: y - 19, width: 22, height: 22, rx: 6, fill: k === (s.active || 1) ? C.accent2 : mix(C.panel, C.text, .3)}, win);
+      label(win, WX + 72, y - 1, n2, 22, k === (s.active || 1) ? "#fff" : C.muted, 600); });
+    const MX = WX + SB + 56, MW = WW - SB - 112;
+    label(win, MX, WY + 140, s.title || "This week", 44, "#fff", 700, "start", F.disp);
+    label(win, MX, WY + 180, s.sub || "4 open · 2 done", 22, C.muted, 500);
+    const IY = WY + 220, BW = 180;
+    S("rect", {x: MX, y: IY, width: MW - BW - 20, height: 64, rx: 14, fill: C.panel2, stroke: C.line, "stroke-width": 2}, win);
+    const ph = label(win, MX + 24, IY + 41, s.placeholder || "Add a task…", 24, C.muted, 500);
+    const typed = label(win, MX + 24, IY + 41, "", 24, "#fff", 500);
+    const caret = S("rect", {x: MX + 24, y: IY + 18, width: 3, height: 30, fill: C.accent2, opacity: 0}, win);
+    const btn = S("g", {}, win);
+    S("rect", {x: MX + MW - BW, y: IY, width: BW, height: 64, rx: 14, fill: C.accent}, btn);
+    label(btn, MX + MW - BW / 2, IY + 41, s.button || "Add task", 24, "#fff", 700, "middle");
+    motion.set(btn, {svgOrigin: `${MX + MW - BW / 2} ${IY + 32}`});
+    const RY = IY + 104, RH = 76;
+    const people = ["Maya", "Raj", "Lee", "Ana", "Kit"];
+    const mkRow = (text, k, done) => {
+      const r = S("g", {}, win), y = RY + k * (RH + 12);
+      S("rect", {x: MX, y, width: MW, height: RH, rx: 16, fill: C.panel, stroke: C.line, "stroke-width": 1.5}, r);
+      const box = S("rect", {x: MX + 24, y: y + 24, width: 28, height: 28, rx: 8, fill: done ? C.alt : "none", stroke: done ? C.alt : C.muted, "stroke-width": 2.5}, r);
+      const tick = S("path", {d: `M${MX + 31} ${y + 38} l6 6 l11 -12`, stroke: "#0b1220", "stroke-width": 3.5, fill: "none", "stroke-linecap": "round", opacity: done ? 1 : 0}, r);
+      const tx = label(r, MX + 74, y + 47, text, 26, done ? C.muted : C.text, 500);
+      const strike = S("path", {d: `M${MX + 70} ${y + 39} h${tx.getComputedTextLength() + 8}`, stroke: C.muted, "stroke-width": 2.5, opacity: done ? 1 : 0}, r);
+      const who = people[k % people.length];
+      S("rect", {x: MX + MW - 230, y: y + 21, width: 96, height: 34, rx: 17, fill: mix(C.panel, C.warm, .2)}, r);
+      label(r, MX + MW - 182, y + 45, ["Mon", "Tue", "Wed", "Thu", "Fri"][k % 5], 18, C.warm, 600, "middle");
+      S("circle", {cx: MX + MW - 64, cy: y + 38, r: 22, fill: [C.accent, C.alt, C.warm][k % 3]}, r);
+      label(r, MX + MW - 64, y + 46, who[0], 22, "#fff", 700, "middle");
+      return {r, box, tick, tx, strike, y, shift: 0};
+    };
+    const rows = (s.rows || ["Draft the launch checklist", "Review the onboarding emails", "Book the team retro"]).slice(0, 5).map((t, k) => mkRow(t, k, false));
+    // cursor
+    const cur = S("g", {}, g);
+    S("path", {d: "M0 0 L0 34 L9 26 L15 40 L21 37 L15 24 L27 24 Z", fill: "#fff", stroke: "#11131f", "stroke-width": 2.5, "stroke-linejoin": "round"}, cur);
+    let cx = WX + WW * .72, cy = WY + WH * .82;
+    motion.set(cur, {x: cx, y: cy, opacity: 0});
+    const steps = s.steps || [{click: "input"}, {type: "Write the release notes"}, {click: "button"}, {toast: "Task added"}];
+    const n = steps.length, t0 = s.start + .6, per = Math.max(.8, (s.dur - 1.4) / n);
+    tl.to(cur, {opacity: 1, duration: .3}, t0 - .3);
+    const moveTo = (x, y, at) => { tl.to(cur, {x, y, duration: Math.min(.7, per * .55), ease: "power2.inOut"}, at); cx = x; cy = y; return at + Math.min(.7, per * .55); };
+    const ripple = (x, y, at) => { const rp = S("circle", {cx: x, cy: y, r: 6, fill: "none", stroke: C.accent2, "stroke-width": 3}, g); motion.set(rp, {opacity: 0});
+      tl.set(rp, {attr: {r: 6}, opacity: .9}, at); tl.to(rp, {attr: {r: 40}, opacity: 0, duration: .5, ease: "power2.out"}, at);
+      tl.to(cur, {scale: .86, duration: .08, svgOrigin: `${x} ${y}`}, at); tl.to(cur, {scale: 1, duration: .14}, at + .08); cue(at, "click"); };
+    let text = "", added = 0;
+    steps.forEach((st, k) => {
+      let at = t0 + k * per;
+      if (st.click !== undefined) {
+        const target = st.click === "button" || st.click === (s.button || "Add task") ? [MX + MW - BW / 2, IY + 34]
+          : st.click === "input" ? [MX + 120, IY + 34] : typeof st.click === "number" && rows[st.click] ? [MX + 38, rows[st.click].y + rows[st.click].shift + 38] : [MX + 200, IY + 34];
+        at = moveTo(target[0] - 4, target[1] - 4, at); ripple(target[0], target[1], at);
+        if (st.click === "button" || st.click === (s.button || "Add task")) {
+          tl.to(btn, {scale: .95, duration: .08}, at); tl.to(btn, {scale: 1, duration: .16}, at + .08);
+          if (text) {
+            const row = mkRow(text, 0, false); motion.set(row.r, {opacity: 0, y: -20});
+            rows.forEach(r => { r.shift += RH + 12; tl.to(r.r, {y: r.shift, duration: .45, ease: "power3.out"}, at + .1); });
+            tl.to(row.r, {opacity: 1, y: 0, duration: .45, ease: "power3.out"}, at + .15);
+            tl.set(typed, {opacity: 0}, at + .1); tl.set(ph, {opacity: 1}, at + .1); tl.set(caret, {opacity: 0}, at + .1);
+            rows.unshift(row); added++; text = ""; cue(at + .15, "pop");
+          }
+        }
+        if (st.click === "input") { tl.set(ph, {opacity: 0}, at); tl.set(caret, {opacity: 1}, at); }
+      } else if (st.type !== undefined) {
+        const word = String(st.type), o = {n: 0}, dur = Math.min(per * .85, word.length * .045);
+        tl.set(ph, {opacity: 0}, at); tl.set(typed, {opacity: 1}, at); tl.set(caret, {opacity: 1}, at);
+        tl.to(o, {n: word.length, duration: dur, ease: "none", onUpdate() { typed.textContent = word.slice(0, Math.round(o.n)); caret.setAttribute("x", MX + 27 + typed.getComputedTextLength()); }}, at);
+        for (let c = 0; c < word.length; c += 3) cue(at + c * dur / word.length, "tick");
+        text = word;
+      } else if (st.check !== undefined) {
+        const r = rows[st.check + added] || rows[0];
+        at = moveTo(MX + 34, r.y + r.shift + 34, at); ripple(MX + 38, r.y + r.shift + 38, at);
+        tl.to(r.box, {attr: {fill: C.alt, stroke: C.alt}, duration: .2}, at); tl.to(r.tick, {opacity: 1, duration: .2}, at + .05);
+        tl.to(r.strike, {opacity: 1, duration: .2}, at + .1); tl.to(r.tx, {fill: C.muted, duration: .3}, at + .1);
+      } else if (st.toast !== undefined) {
+        const tg = S("g", {}, g), tw = 420, tx = WX + WW - tw - 40, ty = WY + WH - 110;
+        S("rect", {x: tx, y: ty, width: tw, height: 72, rx: 18, fill: "#ffffff", filter: "url(#softdark)"}, tg);
+        S("circle", {cx: tx + 40, cy: ty + 36, r: 16, fill: C.alt}, tg);
+        S("path", {d: `M${tx + 33} ${ty + 36} l5 5 l9 -10`, stroke: "#fff", "stroke-width": 3, fill: "none", "stroke-linecap": "round"}, tg);
+        label(tg, tx + 72, ty + 45, st.toast, 24, "#11131f", 600);
+        motion.set(tg, {opacity: 0, y: 30}); tl.to(tg, {opacity: 1, y: 0, duration: .4, ease: "power3.out"}, at); cue(at, "chime");
+        tl.to(tg, {opacity: 0, duration: .3}, Math.min(s.start + s.dur - .4, at + 2.2));
+      }
+    });
+  },
+});
+
 function particles() {
   const g = $("bgfx");
   for (let i = 0; i < 40; i++) {
