@@ -10,6 +10,9 @@ First public release.
   Korean and Russian lines all scored a perfect match, and Chinese and Japanese lines over about 3.5 seconds were
   taken for runaway takes. Accent marks are ignored when comparing, and clone samples are transcribed in their own
   language. (Reported by a user.)
+- Storyboards: `filmwright storyboard` lays out one panel per scene (a still, the narration line, timing and
+  on-screen text) as a page and an A4 PDF with a sign-off box, for approval before the full render. It works for
+  every film type; animated films narrate first (cached) to get real timings (#21).
 - Voices: a library of 7 ready-made narrators with a plain, natural delivery, `voice: {type: library, name:
   olivia}`. Each is a bundled, checksum-verified synthetic reference clip cloned with the Base model, so it sounds
   the same on every machine (#20).

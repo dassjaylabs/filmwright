@@ -11,6 +11,8 @@ python - "$WORK/film/explainer/stories.json" <<'PY'
 import json, sys
 p = sys.argv[1]; stories = json.load(open(p)); json.dump(stories[:1], open(p, "w"))   # one film is enough
 PY
+filmwright storyboard "$WORK/film"                      # narrates (cached) and lays out one panel per beat
+test -s "$WORK/film/out/storyboard/index.html" && test -s "$WORK/film/out/storyboard/storyboard.pdf"
 FPS=8 WORKERS=2 filmwright build "$WORK/film"
 
 python - "$WORK/film" <<'PY'
