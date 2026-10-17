@@ -6,6 +6,7 @@ Commands
   init            write an example film.yaml (fictional brand) next to the given path
   tts             voice each segment's `say` line (cached per sentence)
   stills [t,..]   PNG stills of the animated layer for review (recordings show as black windows)
+  board           storyboard.json for `filmwright storyboard`: one panel per segment, recordings shown as a frame
   render          animated layer, recordings composited into their windows, score, mix, captions, 4K + HD
   verify          duration, resolution, loudness, stray tags, optional text check
 
@@ -147,6 +148,24 @@ class Film:
         times = times or [round(s["start"] + s["dur"] * .7, 2) for s in segs]
         return R.stills(TEMPLATE, self.page(), times, self.root / "stills")
 
+    def board(self) -> Path:
+        from filmwright.storyboard import clip_frame, write_json
+        beats, segs, total = self.timeline()
+        images = self.stills([round(s["start"] + s["dur"] * .7, 2) for s in segs])
+        labels, screen = {}, {}
+        for i, (s, page) in enumerate(zip(self.segs, segs)):
+            labels[s["key"]] = str(s.get("label") or s["kind"]).capitalize()
+            screen[s["key"]] = " · ".join(str(x) for k in ("headline", "title", "sub", "cta") if (x := s.get(k)))
+            if s.get("items"):
+                screen[s["key"]] = (screen[s["key"]] + " · " if screen[s["key"]] else "") + ", ".join(map(str, s["items"]))
+            if s["kind"] == "clip" and s.get("path"):          # the recording itself, not the empty window around it
+                at = float((s.get("trim") or [s.get("start", 0)])[0]) + min(page["dur"], self.clip_seconds(s)) * .6
+                images[i] = clip_frame(Path(s["path"]), at, self.root / "stills" / f"clip-{s['key']}.png") or images[i]
+        for b, page in zip(beats, segs):
+            b["start"] = page["start"]                         # the panel covers the whole segment
+        return write_json(self.root / "storyboard.json",
+                          [{"heading": "", "panels": R.board_panels(beats, total - .6, images, labels, screen)}])
+
     def composite(self, frames: Path, segs: list[dict], total: float, out: Path) -> Path:
         """Put each recording into its window: trimmed, fitted, optionally zoomed, frozen on its last frame if
         the narration runs longer, faded in and out with the window."""
@@ -235,6 +254,8 @@ def main(argv: list[str] | None = None) -> int:
         times = [float(x) for x in argv[2].split(",")] if len(argv) > 2 else None
         for p in f.stills(times):
             print(p)
+    elif cmd == "board":
+        print(f.board())
     elif cmd == "render":
         f.render()
     elif cmd == "verify":

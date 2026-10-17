@@ -1,6 +1,7 @@
 """filmwright: narrated product films, made on your own machine.
 
     filmwright new [DIR]        ask what to make, write DIR/reel.yaml and starter files
+    filmwright storyboard [DIR] one panel per scene (picture, line, timing) to approve before building
     filmwright build [DIR]      make the film described by DIR/reel.yaml
     filmwright doctor           what this machine can run, and what is missing
     filmwright setup [...]      install the tools a film needs (ffmpeg, Chromium, voices...)
@@ -80,6 +81,17 @@ def cmd_build(a: argparse.Namespace) -> int:
         print(f"error: {e}", file=sys.stderr)
         return 2
     return build.run(cfg, only=a.only, skip_record=a.skip_record)
+
+
+def cmd_storyboard(a: argparse.Namespace) -> int:
+    from filmwright import build
+
+    try:
+        cfg = C.load(a.dir)
+    except C.ConfigError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
+    return build.storyboard(cfg, only=a.only, pdf=not a.no_pdf)
 
 
 # --- doctor / setup / options ----------------------------------------------------------------------
@@ -187,6 +199,11 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--only", help="demo: rerun only these scenarios (S01,S02); explainer: only these stories (1,3)")
     b.add_argument("--skip-record", action="store_true", help="demo/both: reuse existing recordings")
 
+    sb = sub.add_parser("storyboard", help="one panel per scene to approve before building (HTML + PDF)")
+    sb.add_argument("dir", nargs="?", default=".")
+    sb.add_argument("--only", help="explainer stories: only these (1,3)")
+    sb.add_argument("--no-pdf", action="store_true", help="the HTML page only")
+
     sub.add_parser("doctor", help="what this machine can run")
     s = sub.add_parser("setup", help="install what films need")
     s.add_argument("--check", action="store_true", help="report only, change nothing")
@@ -200,7 +217,7 @@ def main(argv: list[str] | None = None) -> int:
         a = argparse.Namespace(cmd=argv[0])
         return (cmd_voice if argv[0] == "voice" else cmd_music)(a, argv[1:])
     a = ap.parse_args(argv)
-    return {"new": cmd_new, "build": cmd_build, "doctor": cmd_doctor, "setup": cmd_setup, "options": cmd_options}[a.cmd](a)
+    return {"new": cmd_new, "build": cmd_build, "storyboard": cmd_storyboard, "doctor": cmd_doctor, "setup": cmd_setup, "options": cmd_options}[a.cmd](a)
 
 
 if __name__ == "__main__":

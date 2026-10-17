@@ -6,6 +6,7 @@ Commands
   init                 write montage.json from the bundled example
   tts                  voice the narration (intro, one line per feature, close); cached per sentence
   stills [t,..] [--aspect 9x16|1x1]   PNG stills for review (default: one per scene)
+  board                               storyboard.json for `filmwright storyboard`: one panel per scene
   render               the 16:9 film (4K + HD as requested), then 9:16 and 1:1 when `outputs` asks for
                        vertical / square; all three share one soundtrack, so their timing is identical
   verify               duration, resolution, loudness, stray tags, optional text check
@@ -100,6 +101,14 @@ class Montage:
         times = times or [round(b["start"] + max(b["dur"], 3.6) * .8, 2) for b in bs]
         return R.stills(TEMPLATE, self.page(aspect), times, self.root / "stills" / aspect, ASPECTS[aspect])
 
+    def board(self) -> Path:
+        from filmwright.storyboard import write_json
+        bs, page = self.beats(), self.page()
+        total, _ = R.page_info(TEMPLATE, page)
+        images = self.stills([round(b["start"] + max(b["dur"], 3.6) * .8, 2) for b in bs])
+        labels = {"intro": "Intro", "close": "Close", **{f["key"]: f.get("title", f["key"]) for f in self.features()}}
+        return write_json(self.root / "storyboard.json", [{"heading": "", "panels": R.board_panels(bs, total, images, labels)}])
+
     def render(self) -> list[Path]:
         self.build.mkdir(parents=True, exist_ok=True)
         init = self.page("16x9")
@@ -158,6 +167,8 @@ def main(argv: list[str] | None = None) -> int:
         times = [float(x) for x in argv[2].split(",")] if len(argv) > 2 else None
         for f in m.stills(times, opts.get("--aspect", "16x9")):
             print(f)
+    elif cmd == "board":
+        print(m.board())
     elif cmd == "render":
         m.render()
     elif cmd == "verify":

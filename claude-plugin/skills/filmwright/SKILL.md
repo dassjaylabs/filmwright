@@ -80,6 +80,7 @@ Never create a consent record on someone's behalf, and never try to work around 
 ## 4. Build and check
 
 ```bash
+filmwright storyboard <dir>            # one panel per scene (still, line, timing) as HTML + PDF, for sign-off first
 filmwright build <dir>                 # demo: records, then narrates; --skip-record reuses recordings
 ```
 

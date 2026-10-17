@@ -7,6 +7,7 @@ Commands
   tts      [n,..|all]       write the narration per story and voice it (cached per sentence)
   stills   <n> [t,..]       PNG stills for review (default: one per beat plus the payoff)
   sheet    [n,..|all]       a contact sheet of the default stills, one row per story
+  board    [n,..|all]       storyboard.json for `filmwright storyboard`: one panel per beat (run tts first)
   render   [n,..|all]       frames, music, mix, captions, final 4K + HD files
   recaption [n,..|all]      redo only the final encode (caption changes), from the kept frames and mix
   verify   [n,..|all]       duration, resolution, loudness, stray tags, optional text check
@@ -148,6 +149,19 @@ class Project:
         print(out)
         return out
 
+    def board(self, ns: list[int]) -> Path:
+        from filmwright.storyboard import write_json
+        groups = []
+        for n in ns:
+            c = self.stories[n]
+            init = self.init(c)
+            bs = init["BEATS"]
+            total, _ = R.page_info(TEMPLATE, init)
+            images = R.stills(TEMPLATE, init, [round(b["start"] + b["dur"] * .7, 2) for b in bs], self.outdir(c) / "stills")
+            groups.append({"heading": f"Story {n}: {self.slug(c).replace('-', ' ')} (shape {self.arch(c)}, {total:.0f}s)",
+                           "panels": R.board_panels(bs, total, images)})
+        return write_json(self.root / "storyboard.json", groups)
+
     def render(self, n: int) -> list[Path]:
         c = self.stories[n]
         d = self.outdir(c)
@@ -221,6 +235,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f)
     elif cmd == "sheet":
         p.sheet(pick(arg, p.stories))
+    elif cmd == "board":
+        print(p.board(pick(arg, p.stories)))
     elif cmd == "render":
         for n in pick(arg, p.stories):
             p.render(n)

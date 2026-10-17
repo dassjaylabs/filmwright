@@ -292,3 +292,47 @@ def run(reel: dict, only: str | None = None, skip_record: bool = False) -> int:
         print(f"  {p.relative_to(root) if p.is_relative_to(root) else p}")
     (final / "manifest.json").write_text(json.dumps([str(p.relative_to(root)) for p in delivered], indent=2))
     return 0
+
+
+# --- storyboard ----------------------------------------------------------------------------------------
+
+def storyboard(reel: dict, only: str | None = None, pdf: bool = True) -> int:
+    """One panel per scene, for sign-off before the full render: out/storyboard/index.html (+ storyboard.pdf).
+    Animated films narrate first (cached, so the real build reuses it) to get real timings and pictures."""
+    from filmwright import storyboard as SB
+    root = Path(reel["_dir"])
+    v = reel["voice"]
+    voice = {"preset": v.get("speaker"), "library": v.get("name"), "described": "described", "clone": "cloned",
+             "system": "system"}.get(v["type"], "")
+    meta = {"Film": reel["mode"] + (f" ({reel['explainer']['format']})" if reel["mode"] == "explainer" else ""),
+            "Voice": f"{v['type']} · {voice}" if voice and voice != v["type"] else v["type"],
+            "Music": reel["music"]["mood"], "Sound effects": reel["sound_effects"]}
+    try:
+        C.effective_voice_type(reel)
+        if reel["mode"] == "demo":
+            resolved, _ = _resolve_demo(reel, root)
+            film = yaml.safe_load(resolved.read_text()) or {}
+            groups = SB.demo_groups(film, resolved.parent, root / "out" / "storyboard" / ".frames")
+            meta["Timing"] = "estimated from the script"
+        else:
+            if reel["mode"] == "explainer":
+                target = (root / reel["explainer"]["project"]).resolve()
+                story = reel["explainer"]["format"] == "story"
+                module = "filmwright.explainer.story" if story else "filmwright.explainer.montage"
+                steps = [["tts", only or "all"], ["board", only or "all"]] if story else [["tts"], ["board"]]
+                folder = target
+            else:
+                target = (root / reel["both"]["film"]).resolve()
+                module, steps, folder = "filmwright.hybrid.film", [["tts"], ["board"]], target.parent
+            if not _pipeline(module, target, _settings(reel, root), steps, root):
+                return 1
+            groups = SB.load_groups(folder / "storyboard.json")
+    except C.ConfigError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
+    title = reel.get("title") or root.name
+    out = SB.build(title, meta, groups, root / "out" / "storyboard", pdf=pdf)
+    print("\nStoryboard:")
+    for p in out:
+        print(f"  {p.relative_to(root) if p.is_relative_to(root) else p}")
+    return 0

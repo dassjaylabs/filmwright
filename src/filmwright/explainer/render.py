@@ -208,6 +208,19 @@ def stills(template: Path, init: dict, times: list[float], folder: Path, size: t
     return out
 
 
+def board_panels(beats: list[dict], total: float, images: list[Path], labels: dict[str, str] | None = None,
+                 on_screen: dict[str, str] | None = None) -> list[dict]:
+    """Storyboard panels for beats on a timeline: each lasts until the next one starts (the last until `total`)."""
+    out = []
+    for i, (b, img) in enumerate(zip(beats, images)):
+        start = 0.0 if i == 0 else b["start"]                  # the first scene is on screen from the first frame
+        end = beats[i + 1]["start"] if i + 1 < len(beats) else total
+        out.append({"label": (labels or {}).get(b["key"], b["key"].replace("_", " ").capitalize()),
+                    "start": round(start, 2), "dur": round(end - start, 2), "text": b.get("text", ""),
+                    "on_screen": (on_screen or {}).get(b["key"], ""), "image": str(img)})
+    return out
+
+
 def contact_sheet(rows: list[list[Path]], out: Path, w: int = 384) -> Path:
     from PIL import Image
     h = round(w * 9 / 16)

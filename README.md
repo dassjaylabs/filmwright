@@ -45,6 +45,7 @@ filmwright setup             # ffmpeg, open-source Chromium, espeak-ng, Rhubarb 
 filmwright doctor            # what this machine can run
 
 filmwright new my-film       # answers a few questions, writes my-film/reel.yaml and starter files
+filmwright storyboard my-film  # optional: one panel per scene (still, line, timing) as a page + PDF to approve
 filmwright build my-film     # makes the film; files land in my-film/out/final/
 ```
 
@@ -174,7 +175,7 @@ altered media.
 
 ## Documentation
 
-- [Configuration (`reel.yaml`)](docs/configuration.md) · [Install](docs/install.md) · [Architecture](docs/architecture.md)
+- [Storyboards for review](docs/storyboard.md) · [Configuration (`reel.yaml`)](docs/configuration.md) · [Install](docs/install.md) · [Architecture](docs/architecture.md)
 - Demo: [walkthroughs](docs/demo.md), [scenario steps](docs/scenario-dsl.md), [film options](docs/film.md), [series](docs/series.md)
 - Explainer: [overview](docs/explainer.md), [story config](docs/story-config.md), [montage](docs/montage.md), [style guide](docs/style-guide.md)
 - Both: [hybrid films](docs/hybrid.md)
