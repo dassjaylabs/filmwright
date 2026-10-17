@@ -21,8 +21,8 @@ First public release.
   play at -16 LUFS like the other film types instead of about -24, and the music level is measured against the
   real voice. Measured on the examples, the music now sits about 21 dB under the voice (was 9 to 16) (#19).
 - Narration: a take spoken much slower than normal speech (drawn-out words) is now regenerated like a garbled
-  one, and the most natural take is kept (#15). The README sample is re-narrated in a plain conversational style
-  at a normal pace (#16, from user feedback).
+  one, and the most natural take is kept (#15). The README sample is re-narrated by the library voice `olivia`
+  with the quieter mix (#16, #26, from user feedback).
 - File names: film names keep the letters of any script, so a Japanese or Russian title no longer becomes
   `film` (#9, contributed). Product names, `file_prefix` and story slugs are made file-safe the same way in
   every film type (a product called `Acme/Tasks` broke the path), the same title always gives the same name

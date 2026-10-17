@@ -10,7 +10,7 @@ Everything runs locally: the browser, the voices, the music, the encoding. Nothi
 alt="A 30-second sample film made with filmwright: title, a demo walkthrough, an animated explainer, a feature montage and the options"></a>
 
 **[▶ Watch the 30-second sample with sound](docs/media/filmwright-sample.mp4)**, made with filmwright itself
-([source](docs/media/sample/film.yaml)): narrated by Qwen3-TTS (preset voice `ryan`, in a plain conversational style) on a Mac, with an upbeat score
+([source](docs/media/sample/film.yaml)): narrated by Qwen3-TTS (the library voice `olivia`) on a Mac, with an upbeat score
 from the built-in composer.
 
 ![Frames from filmwright example films: an animated character story, a whiteboard sketch, a product dashboard, a
