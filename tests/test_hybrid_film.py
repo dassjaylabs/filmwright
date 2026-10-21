@@ -55,3 +55,36 @@ def test_zoom_expression_eases_in_holds_and_out():
     assert at(1.25) == pytest.approx(1.25)
     assert at(2.5) == pytest.approx(1.5)
     assert at(5.0) == pytest.approx(1.0)
+
+
+def test_new_scenes_are_accepted_and_hold_long_enough(tmp_path):
+    from filmwright.hybrid.film import MIN_HOLD, SCENES
+    for kind in ("headline", "chart", "device", "ui"):
+        assert kind in SCENES and MIN_HOLD[kind] >= 2.8
+    f = Film(write(tmp_path, [{"scene": k, "say": ""} for k in ("headline", "chart", "device", "ui")]))
+    assert [s["kind"] for s in f.segs] == ["headline", "chart", "device", "ui"]
+
+
+def test_device_screenshots_must_exist(tmp_path):
+    with pytest.raises(SystemExit, match="not found"):
+        Film(write(tmp_path, [{"scene": "device", "image": "missing.png"}]))
+    (tmp_path / "shot.png").write_bytes(b"png")
+    seg = Film(write(tmp_path, [{"scene": "device", "image": "shot.png"}])).segs[0]
+    assert seg["image"].startswith("file://") and seg["image"].endswith("shot.png")
+
+
+def test_new_scenes_render(tmp_path):
+    pytest.importorskip("playwright")
+    from filmwright.explainer import render as R
+    from filmwright.hybrid.film import TEMPLATE
+    segs = [{"kind": "headline", "start": 0, "dur": 3, "text": "Plan *less*.\\nDo more."},
+            {"kind": "chart", "start": 3, "dur": 4, "data": [{"label": "A", "value": 3}, {"label": "B", "value": 7}], "note": "+4"},
+            {"kind": "chart", "start": 7, "dur": 4, "type": "line", "data": [{"label": "A", "value": 1}, {"label": "B", "value": 2}]},
+            {"kind": "device", "start": 11, "dur": 4},
+            {"kind": "ui", "start": 15, "dur": 5, "steps": [{"click": "input"}, {"type": "Hi"}, {"click": "button"}, {"check": 0}, {"toast": "Done"}]}]
+    try:
+        total, sfx = R.page_info(TEMPLATE, {"FILM": {"segments": segs}})
+    except Exception as e:                                   # no browser installed on this machine
+        pytest.skip(f"no headless browser: {e}")
+    assert total == pytest.approx(20.6)
+    assert {n for _, n in sfx} >= {"click", "pop", "chime", "tick"}

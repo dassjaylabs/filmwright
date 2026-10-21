@@ -1,9 +1,9 @@
 mode: both
-title: filmwright in thirty seconds
+title: Acme Tasks in 45 seconds
 both: {film: film.yaml}
 voice: {type: library, name: olivia}
 talking_head: {enabled: false}
-music: {mood: upbeat}
+music: {mood: corporate}
 captions: {burn_in: true}
 outputs: [hd, web, gif]
 disclosure: metadata

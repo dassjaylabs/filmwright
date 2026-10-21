@@ -1,35 +1,41 @@
-# The 30-second sample film in the README, made with filmwright from frames of the bundled examples.
-# Build the examples it quotes first (demo-app, explainer-invoicing, montage-fitness), then:
+# The sample film in the README, made with filmwright: kinetic type, charts, device frames and a product screen
+# with a cursor, all animated (no recordings needed). Acme Tasks is a fictional product; the numbers are sample data.
 #   filmwright build docs/media/sample
-title: filmwright in thirty seconds
+title: Acme Tasks in 45 seconds
 file_prefix: filmwright-sample
-wordmark: FILMWRIGHT
-tagline: Narrated product films, made on your machine.
-url: github.com/dassjaylabs/filmwright
-brand:
-  colors: {bg: "#0f1222", accent: "#7c5cff", alt: "#22c55e", warm: "#ff8a4c", ink: "#f4f5fb"}
-
+brand: {wordmark: ACME TASKS, tagline: Plan less. Do more., url: acme-tasks.example}
+voice: {type: library, name: olivia}
+music: {mood: corporate}
 segments:
-  - scene: title
-    headline: Product films, made for you
-    sub: Demo walkthroughs, animated explainers, or both.
-    say: Meet filmwright. It turns your product into a narrated film.
-  - clip: ../../../examples/demo-app/out/acme-tasks-tour.mp4
-    trim: [15.5, 22.5]
-    label: demo walkthrough
-    say: Record a walkthrough of your real app, with a zoom on every click.
-  - clip: ../../../examples/explainer-invoicing/02-translator-cash-flow/build/frames.mp4
-    trim: [17.5, 24.5]
-    label: animated explainer
-    say: Or tell the story with animated characters and sketches.
-  - clip: ../../../examples/montage-fitness/build/frames.mp4
-    trim: [13.5, 19.5]
-    label: feature montage
-    say: Show every feature in a minute, on any screen.
-  - scene: steps
-    title: You choose
-    items: [The voice, A presenter, The music's mood, Every format you need]
-    say: Pick the voice, a presenter, the music, and the formats.
+  - scene: headline
+    text: "Your week, *planned*\nin minutes, not *hours*."
+    sub: Acme Tasks keeps the whole team on one list.
+    say: Your week, planned in minutes, not hours. Acme Tasks keeps the whole team on one list.
+  - scene: chart
+    title: Teams finish more of what they plan
+    sub: Share of planned tasks done each week
+    data: [{label: Week 1, value: 52}, {label: Week 2, value: 61}, {label: Week 3, value: 68}, {label: Week 4, value: 79}, {label: Week 5, value: 88}]
+    unit: "%"
+    note: "+36 points"
+    say: Teams finish more of what they plan. By week five, nearly nine in ten planned tasks get done.
+  - scene: chart
+    type: line
+    title: Hours saved every week
+    data: [{label: Jan, value: 2}, {label: Feb, value: 4.5}, {label: Mar, value: 6}, {label: Apr, value: 8.5}, {label: May, value: 11}]
+    unit: " h"
+    note: "11 h saved"
+    say: And the time saved keeps growing, to eleven hours a week by May.
+  - scene: device
+    title: On your desk and in your pocket
+    say: It works the same on your laptop and on your phone.
+  - scene: device
+    device: laptop
+    image: screen.png
+    say: Here's your real week, exactly as your team sees it.
+  - scene: ui
+    title: This week
+    steps: [{click: input}, {type: Write the release notes}, {click: button}, {toast: Task added}, {check: 1}]
+    say: Click in the box, type the task, and add it. It lands at the top of the list, and finished work gets ticked off.
   - scene: outro
-    cta: Open source on GitHub
-    say: It's open source. Give it a try.
+    cta: Try it free
+    say: Plan less. Do more. Try Acme Tasks free.
