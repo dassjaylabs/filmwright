@@ -1,0 +1,9 @@
+mode: both
+title: Acme Tasks in 45 seconds, with a presenter
+both: {film: film.yaml}
+voice: {type: library, name: olivia}
+talking_head: {enabled: true, character: ana, corner: bottom-right}
+music: {mood: corporate}
+captions: {burn_in: true}
+outputs: [hd, web, gif]
+disclosure: metadata
