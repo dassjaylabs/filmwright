@@ -12,6 +12,7 @@ First public release.
   language. (Reported by a user.)
 - Contributing: no Contributor License Agreement to sign any more; contributions are accepted under the
   project's MIT license (#31).
+- A second README sample: the same film with the animated presenter `ana` (#33).
 - Scenes: four new animated scenes for hybrid films: `headline` (kinetic type), `chart` (bar or line, building
   up), `device` (laptop and phone frames with your screenshots) and `ui` (a product screen with a cursor that clicks,
   types and ticks). The README sample now shows them off (#22, #30).

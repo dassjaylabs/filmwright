@@ -14,6 +14,13 @@ alt="A 45-second sample film made with filmwright: kinetic headline, an animated
 a product screen with a cursor, all animated. Narrated by Qwen3-TTS (the library voice `olivia`) on a Mac, with a
 corporate score from the built-in composer.
 
+<a href="docs/media/filmwright-sample-presenter.mp4"><img src="docs/media/filmwright-sample-presenter.jpg" width="360"
+alt="The same sample film with an animated presenter, Ana, lip-synced to the narration in the bottom-right corner"></a>
+
+**[▶ The same film with an animated presenter](docs/media/filmwright-sample-presenter.mp4)**
+([source](docs/media/sample-presenter/reel.yaml)): the character `ana`, lip-synced to the narration, switched on with
+one line in `reel.yaml` (`talking_head: {enabled: true, character: ana}`).
+
 ![Frames from filmwright example films: an animated character story, a whiteboard sketch, a product dashboard, a
 recorded demo with a presenter, a hybrid title scene and a vertical feature montage](docs/media/gallery.jpg)
 

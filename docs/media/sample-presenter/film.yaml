@@ -1,0 +1,41 @@
+# The README sample with an animated presenter: the same film as ../sample, plus `talking_head`. Made with filmwright: kinetic type, charts, device frames and a product screen
+# with a cursor, all animated (no recordings needed). Acme Tasks is a fictional product; the numbers are sample data.
+#   filmwright build docs/media/sample-presenter
+title: Acme Tasks in 45 seconds
+file_prefix: filmwright-sample-presenter
+brand: {wordmark: ACME TASKS, tagline: Plan less. Do more., url: acme-tasks.example}
+voice: {type: library, name: olivia}
+music: {mood: corporate}
+segments:
+  - scene: headline
+    text: "Your week, *planned*\nin minutes, not *hours*."
+    sub: Acme Tasks keeps the whole team on one list.
+    say: Your week, planned in minutes, not hours. Acme Tasks keeps the whole team on one list.
+  - scene: chart
+    title: Teams finish more of what they plan
+    sub: Share of planned tasks done each week
+    data: [{label: Week 1, value: 52}, {label: Week 2, value: 61}, {label: Week 3, value: 68}, {label: Week 4, value: 79}, {label: Week 5, value: 88}]
+    unit: "%"
+    note: "+36 points"
+    say: Teams finish more of what they plan. By week five, nearly nine in ten planned tasks get done.
+  - scene: chart
+    type: line
+    title: Hours saved every week
+    data: [{label: Jan, value: 2}, {label: Feb, value: 4.5}, {label: Mar, value: 6}, {label: Apr, value: 8.5}, {label: May, value: 11}]
+    unit: " h"
+    note: "11 h saved"
+    say: And the time saved keeps growing, to eleven hours a week by May.
+  - scene: device
+    title: On your desk and in your pocket
+    say: It works the same on your laptop and on your phone.
+  - scene: device
+    device: laptop
+    image: screen.png
+    say: Here's your real week, exactly as your team sees it.
+  - scene: ui
+    title: This week
+    steps: [{click: input}, {type: Write the release notes}, {click: button}, {toast: Task added}, {check: 1}]
+    say: Click in the box, type the task, and add it. It lands at the top of the list, and finished work gets ticked off.
+  - scene: outro
+    cta: Try it free
+    say: Plan less. Do more. Try Acme Tasks free.
