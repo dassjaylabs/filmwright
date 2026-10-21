@@ -10,6 +10,8 @@ First public release.
   Korean and Russian lines all scored a perfect match, and Chinese and Japanese lines over about 3.5 seconds were
   taken for runaway takes. Accent marks are ignored when comparing, and clone samples are transcribed in their own
   language. (Reported by a user.)
+- Contributing: no Contributor License Agreement to sign any more; contributions are accepted under the
+  project's MIT license (#31).
 - Scenes: four new animated scenes for hybrid films: `headline` (kinetic type), `chart` (bar or line, building
   up), `device` (laptop and phone frames with your screenshots) and `ui` (a product screen with a cursor that clicks,
   types and ticks). The README sample now shows them off (#22, #30).

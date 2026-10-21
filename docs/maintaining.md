@@ -57,8 +57,8 @@ Priorities:
 ## Pull requests
 
 - Every pull request links its issue (`Fixes #12`) so merging closes it.
-- CI must pass (lint, tests and the smoke build on Ubuntu and macOS). First-time contributors sign the
-  [CLA](../CLA.md); the bot asks on the pull request. Don't merge until it shows as signed.
+- CI must pass (lint, tests and the smoke build on Ubuntu and macOS). Contributions come in under the project's
+  MIT license; there is no CLA.
 - Squash-merge with a message that says what changed and why. User-visible changes get a line in
   [CHANGELOG.md](../CHANGELOG.md) under the next version.
 - Keep everything generic: fictional Acme examples only, no real products, people or brands.
@@ -76,7 +76,7 @@ options, and the CHANGELOG says how to migrate.
 ## Repository settings
 
 - `main` requires the CI checks to pass; force pushes and deletion are blocked.
-- `cla-signatures` holds the CLA bot's records. Don't protect or delete it.
+- `cla-signatures` is the archive of the retired CLA bot's records (the CLA was dropped in 0.1.0).
 - Dependabot opens weekly pull requests for GitHub Actions and Python dependencies, and security updates as needed.
 - Private vulnerability reporting is on; advisories are handled per [SECURITY.md](../SECURITY.md).
 - Secret scanning with push protection and CodeQL code scanning are on.
