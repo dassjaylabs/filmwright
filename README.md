@@ -208,9 +208,8 @@ and ideas are just as welcome in [Issues](https://github.com/dassjaylabs/filmwri
 
 ## Contributing and license
 
-Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md);
-code contributions need a one-time [Contributor License Agreement](CLA.md). Report security issues privately
-([SECURITY.md](SECURITY.md)).
+Contributions are welcome, with nothing to sign. See [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[Code of Conduct](CODE_OF_CONDUCT.md). Report security issues privately ([SECURITY.md](SECURITY.md)).
 
 MIT licensed. The filmwright name and logo are not covered by the license ([TRADEMARKS.md](TRADEMARKS.md)).
 Everything filmwright bundles or installs is open source; see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md). The animation engine (`motion.js`) is part of this project.
