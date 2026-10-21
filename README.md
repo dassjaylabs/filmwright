@@ -7,11 +7,12 @@ with a one-page `reel.yaml`.
 Everything runs locally: the browser, the voices, the music, the encoding. Nothing is uploaded.
 
 <a href="docs/media/filmwright-sample.mp4"><img src="docs/media/filmwright-sample.gif" width="720"
-alt="A 30-second sample film made with filmwright: title, a demo walkthrough, an animated explainer, a feature montage and the options"></a>
+alt="A 45-second sample film made with filmwright: kinetic headline, an animated bar chart and line chart, a laptop and phone, and a product screen with a cursor adding a task"></a>
 
-**[▶ Watch the 30-second sample with sound](docs/media/filmwright-sample.mp4)**, made with filmwright itself
-([source](docs/media/sample/film.yaml)): narrated by Qwen3-TTS (the library voice `olivia`) on a Mac, with an upbeat score
-from the built-in composer.
+**[▶ Watch the 45-second sample with sound](docs/media/filmwright-sample.mp4)**, made with filmwright itself
+([source](docs/media/sample/film.yaml)) for a fictional product: kinetic type, charts that build up, device frames and
+a product screen with a cursor, all animated. Narrated by Qwen3-TTS (the library voice `olivia`) on a Mac, with a
+corporate score from the built-in composer.
 
 ![Frames from filmwright example films: an animated character story, a whiteboard sketch, a product dashboard, a
 recorded demo with a presenter, a hybrid title scene and a vertical feature montage](docs/media/gallery.jpg)

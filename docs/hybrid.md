@@ -52,6 +52,10 @@ Every segment may have `say` (its narration; segments without it are silent) and
 | `scene: statement` | `text` (`\n` for a second line, drawn in the accent colour), `sub`, `highlight: false` | big kinetic type |
 | `scene: steps` | `title`, `items` (up to 5) | numbered cards fly in on the beat |
 | `scene: stat` | `value`, `prefix`, `suffix`, `label` | a number counts up |
+| `scene: headline` | `text` (`\n` for a new line; wrap words in `*stars*` to mark them in the accent colour), `sub`, `size` | kinetic type: words arrive in the rhythm of the line, with a slow push-in |
+| `scene: chart` | `data: [{label, value}, ...]` (up to 8), `type: bar` or `line`, `title`, `sub`, `unit`, `prefix`, `highlight` (index or label; default the last), `note` | the chart builds up with values counting, the highlighted bar or point glows, `note` pops up as a callout |
+| `scene: device` | `device: both`, `laptop` or `phone`; `image` (laptop screen) and `phone_image`: screenshots next to `film.yaml`; `title`, `sub` | a laptop and/or phone with depth and a glass sheen, showing your screenshots, or a generated dashboard in the brand colours |
+| `scene: ui` | `title`, `sub`, `app`, `nav`, `rows` (up to 5), `placeholder`, `button`, `steps` | a product screen and a cursor acting out `steps`: `{click: input}`, `{type: "..."}`, `{click: button}` (adds the typed row), `{check: 1}` (ticks a row), `{toast: "..."}` |
 | `scene: outro` | `tagline`, `cta` (defaults to the brand `url`) | logo, wordmark, tagline, call-to-action pill |
 | `clip: <path>` | `trim: [from, to]` or `start`, `label` (shown in the window bar), `zoom`, `fit: clip` | the recording in a window frame |
 
@@ -63,4 +67,5 @@ and with `fit: clip` the segment is stretched to show the whole recording. The r
 centre).
 
 Paths are relative to `film.yaml`. Scene starts snap to the music's beat, and each scene stays on screen long
-enough for its animation (title 3.2 s, steps 3.6 s, outro 4.2 s).
+enough for its animation (title 3.2 s, headline 2.8 s, steps 3.6 s, chart 4 s, device 3.6 s, ui 5 s, outro 4.2 s).
+The README sample ([`docs/media/sample/film.yaml`](media/sample/film.yaml)) uses headline, chart, device and ui.
