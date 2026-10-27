@@ -314,12 +314,13 @@ def soundtrack(build: Path, total: float, cuts: list[float], sfx_cues: list, mus
 
 
 # ---------------------------------------------------------------------------------------------------- captions + encode
-def caption_images(beats: list[dict], W: int, H: int, folder: Path) -> list[tuple]:
-    """Small burned-in captions: ~1.6% of frame height, near-white text with a soft outline on a dark
-    strip, centred, 1.75% above the bottom edge, one line wherever it fits (70% of the width)."""
+def caption_images(beats: list[dict], W: int, H: int, folder: Path, scale: float = 1.0) -> list[tuple]:
+    """Small burned-in captions: ~1.6% of frame height (times `scale`; 1.4 reads on a phone), near-white text
+    with a soft outline on a dark strip, centred, 1.75% above the bottom edge, one line wherever it fits (70%
+    of the width)."""
     from PIL import Image, ImageDraw, ImageFont
     folder.mkdir(parents=True, exist_ok=True)
-    fs = max(14, round(min(W, H) * .016 * (1 if W >= H else 1.15)))
+    fs = max(14, round(min(W, H) * .016 * (1 if W >= H else 1.15) * float(scale or 1)))
     font = ImageFont.truetype(str(FONT), fs)
     maxw, padx, pady, gap = W * (.7 if W >= H else .86), round(fs * .55), round(fs * .28), round(fs * .25)
     stroke = max(1, round(min(W, H) / 1080))
@@ -353,8 +354,8 @@ def caption_images(beats: list[dict], W: int, H: int, folder: Path) -> list[tupl
 
 
 def encode(frames: Path, mix_wav: Path, beats: list[dict], total: float, out: Path, W: int, H: int, crf: str,
-           burn: bool = True, tune: str = "animation") -> Path:
-    caps = caption_images(beats, W, H, frames.parent / "captions") if burn else []
+           burn: bool = True, tune: str = "animation", caption_scale: float = 1.0) -> Path:
+    caps = caption_images(beats, W, H, frames.parent / "captions", caption_scale) if burn else []
     ins = ["-i", str(frames), "-i", str(mix_wav)]
     chain = [f"[0:v]scale={W}:{H}:flags=lanczos[b0]"]
     for k, (png, x, y, t0, t1) in enumerate(caps):
@@ -371,7 +372,9 @@ def finish(frames: Path, mix_wav: Path, beats: list[dict], total: float, folder:
            vo_wav: Path | None = None) -> list[Path]:
     """4K + HD masters (as requested in `outputs`), the .srt, and the optional talking-head overlay."""
     outputs = settings.get("outputs") or ["4k", "hd"]
-    burn = (settings.get("captions") or {}).get("burn_in", True) is not False
+    caps = settings.get("captions") or {}
+    burn = caps.get("burn_in", True) is not False
+    cap_scale = float(caps.get("scale") or 1)
     write_srt(beats, folder / f"{stem}.srt")
     made = []
     wanted = [o for o in ("4k", "hd") if o in outputs] or ["hd"]
@@ -379,7 +382,7 @@ def finish(frames: Path, mix_wav: Path, beats: list[dict], total: float, folder:
     for name in wanted:
         W, H, crf = SIZES[name]
         f = folder / f"{stem}-{name}.mp4"
-        encode(frames, mix_wav, beats, total, f, W, H, crf, burn)
+        encode(frames, mix_wav, beats, total, f, W, H, crf, burn, caption_scale=cap_scale)
         if th.get("enabled"):
             from filmwright.presenter import overlay_on_video
             tmp = f.with_name(f.stem + ".host.mp4")

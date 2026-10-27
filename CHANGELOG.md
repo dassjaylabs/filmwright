@@ -4,6 +4,13 @@
 
 First public release.
 
+- Hybrid films: camera paths on recordings. `pan` pushes in and visits a few stops with a full second on each
+  (the phone-readable close-up); `cam` takes explicit keyframes. The camera reads straight from the recording's
+  own pixels, a path sets the segment's minimum length, and a recording that ends early holds its last frame under
+  the moving camera. Also `frame: wide` for the recording window, `holds` to scale scene times, `captions.scale`
+  (1.4 reads on a phone), and a `sheet` command that lays the rendered film out as frames with its narration.
+  docs/hybrid.md has the phone-cut guidance: the square and vertical renditions show the same picture at the same
+  width on a phone, so readable type has to come from the camera, not the frame shape.
 - Demo recorder: refuses a saved session whose token has expired, instead of quietly recording the app signed
   out (`--allow-expired` overrides).
 - Voices: two more library narrators for finance and analysis films, `graham` (British man, early 50s, veteran
