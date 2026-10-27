@@ -18,7 +18,7 @@ voice:
 | type | what you get | needs |
 |---|---|---|
 | `preset` (default) | a built-in speaker: `ryan`, `aiden` (native English); `serena`, `vivian`, `dylan`, `eric`, `uncle_fu` (Chinese-native), `ono_anna` (Japanese), `sohee` (Korean). The non-English speakers read English with an accent. | Apple Silicon, `filmwright setup --voice preset` (5.8 GB, once) |
-| `library` | a ready-made narrator picked by name: `nora`, `james`, `olivia`, `henry`, `priya`, `marcus`, `ethan` ([below](#library-voices)) | Apple Silicon, `filmwright setup --voice library` (5.8 GB, once) |
+| `library` | a ready-made narrator picked by name: `nora`, `james`, `olivia`, `henry`, `priya`, `marcus`, `ethan`, `graham`, `claire` ([below](#library-voices)) | Apple Silicon, `filmwright setup --voice library` (5.8 GB, once) |
 | `described` | a voice designed from a sentence, e.g. "Calm, friendly narrator in her thirties, British" | Apple Silicon, `filmwright setup --voice described` (10 GB, once) |
 | `clone` | a voice cloned from a short recording of a real person, **with their consent** | Apple Silicon, `filmwright setup --voice clone` (5.8 GB, once), a consented sample |
 | `system` | espeak-ng: robotic, but it runs anywhere | `filmwright setup` |
@@ -69,6 +69,8 @@ voice: {type: library, name: olivia}
 | `priya` | Indian English woman, 30s, bright and clear explainer |
 | `marcus` | American man, 40s, deep and assured (B2B) |
 | `ethan` | American man, late 20s, bright and friendly (launches) |
+| `graham` | British man, early 50s, veteran analyst: deep, unhurried, dry (finance, research, B2B) |
+| `claire` | American woman, mid 40s, senior strategist: rich low alto, crisp and composed (finance, data, briefings) |
 
 Each was designed once from a written description with Qwen3-TTS VoiceDesign and ships as a short reference clip
 (`src/filmwright/assets/voices/`). A film clones that clip with the Base model, so the voice sounds the same on

@@ -37,7 +37,7 @@ recorded demo with a presenter, a hybrid title scene and a vertical feature mont
 | Choice | Options |
 |---|---|
 | Film type | `demo`, `explainer` (`story` or `montage`), `both` |
-| Narration voice | `preset` (built-in narrators), `library` (7 ready-made, natural narrators), `described` (describe a voice in words), `clone` (your own voice, with consent), `system` (works anywhere) |
+| Narration voice | `preset` (built-in narrators), `library` (9 ready-made, natural narrators), `described` (describe a voice in words), `clone` (your own voice, with consent), `system` (works anywhere) |
 | Talking head | an animated, lip-synced presenter in the corner, 10 characters, or none |
 | Music | original score in a mood: `upbeat`, `calm`, `corporate`, `inspiring`, `playful`, `epic`, `sad`, `suspense`, or `none`; downbeats land on scene changes |
 | Sound effects | `subtle` (quiet clicks and pops only, the default), `full` (adds whooshes and risers on transitions) or `off` |
@@ -134,7 +134,7 @@ and they run on your machine.
 | Job | What does it | Model or tool | Size · licence |
 |---|---|---|---|
 | Narration, `preset` | built-in narrators: `ryan`, `aiden`, `serena`, `vivian`, `dylan`, `eric`, `uncle_fu`, `ono_anna`, `sohee` | [Qwen3-TTS 1.7B CustomVoice](https://huggingface.co/Qwen) | 4.2 GB · Apache-2.0 |
-| Narration, `library` | 7 ready-made narrators with a plain delivery (`nora`, `james`, `olivia`, `henry`, `priya`, `marcus`, `ethan`), designed once with VoiceDesign and bundled as short reference clips | Qwen3-TTS 1.7B Base | 4.2 GB · Apache-2.0 |
+| Narration, `library` | 9 ready-made narrators with a plain delivery (`nora`, `james`, `olivia`, `henry`, `priya`, `marcus`, `ethan`, `graham`, `claire`), designed once with VoiceDesign and bundled as short reference clips | Qwen3-TTS 1.7B Base | 4.2 GB · Apache-2.0 |
 | Narration, `described` | turns a sentence ("calm narrator in her thirties") into a voice, renders it once as a reference, then clones that reference so the voice stays the same across the film | Qwen3-TTS 1.7B VoiceDesign + Base | 4.2 GB each · Apache-2.0 |
 | Voice cloning, `clone` | speaks in a recorded voice, only with a matching consent record | Qwen3-TTS 1.7B Base | 4.2 GB · Apache-2.0 |
 | Read-back check | transcribes every narrated sentence; a garbled, cut-off, runaway or drawn-out take is regenerated with a new seed (up to 3 tries, best kept, failures listed). Also transcribes clone recordings | [Whisper large-v3-turbo](https://huggingface.co/openai/whisper-large-v3-turbo) | 1.6 GB · MIT |

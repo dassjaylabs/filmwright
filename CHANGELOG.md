@@ -4,6 +4,8 @@
 
 First public release.
 
+- Voices: two more library narrators for finance and analysis films, `graham` (British man, early 50s, veteran
+  analyst) and `claire` (American woman, mid 40s, senior strategist).
 - Demo recorder: zooms on a click below the fold land on the target. The target's box was logged before the click
   scrolled it into view, so its zoom aimed at where it had been, or was dropped as off-screen. The runner now
   scrolls the target into view first and rests on the page for a moment, and auto-focus never starts a zoom before
