@@ -22,7 +22,7 @@ CHOICE_HELP = {
     },
     "voice": {
         "preset": "Preset voice: a built-in narrator (no recording needed)",
-        "library": "Library voice: a ready-made, natural narrator (nora, james, olivia, henry, priya, marcus, ethan)",
+        "library": "Library voice: a ready-made, natural narrator (nora, james, olivia, henry, priya, marcus, ethan, graham, claire)",
         "described": "Described voice: describe the voice in words and one is designed for you",
         "clone": "Cloned voice: your own voice from a short recording (needs the speaker's consent)",
         "system": "System voice: works on any machine, robotic, no download",

@@ -50,6 +50,20 @@
       "seed": 4,
       "sha256": "2fec0dc8b98ad3de1fdc3c6aacbbec2a5fca1e21e63c9e36fb7961bff2211f82",
       "seconds": 9.84
+    },
+    "graham": {
+      "label": "Graham: British man, early 50s, veteran analyst (finance, research, B2B)",
+      "description": "British man in his early fifties, a veteran City fund analyst. Deep, slightly gravelly voice, unhurried and dry, quietly confident. Plain delivery at a natural pace, no sales pitch, no drawn-out words.",
+      "seed": 7,
+      "sha256": "0bc53e9bcd164bd98a9b8fd4235beceb077ed16f6afa457c48a3c6be8f13b5e3",
+      "seconds": 11.28
+    },
+    "claire": {
+      "label": "Claire: American woman, mid 40s, senior strategist (finance, data, briefings)",
+      "description": "American woman in her mid forties, a senior market strategist. Rich, low alto, crisp and composed, assured and warm. Even, natural pace, like briefing a client, no exaggerated emphasis.",
+      "seed": 7,
+      "sha256": "4de5fb039f58b6f1dafbe7591024de2d345784014c886407394499000d08aa87",
+      "seconds": 9.52
     }
   }
 }

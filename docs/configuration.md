@@ -10,7 +10,7 @@ default shown. `filmwright options` prints the same choices.
 | `brand` | bundled name or folder | `example` | Colours, logo and wordmark ([brands.md](brands.md)) |
 | `voice.type` | `preset`, `library`, `described`, `clone`, `system` | `preset` | Who narrates ([voice.md](voice.md)) |
 | `voice.speaker` | `ryan`, `aiden`, … | `ryan` | Preset speaker |
-| `voice.name` | `nora`, `james`, `olivia`, `henry`, `priya`, `marcus`, `ethan` | — | Library narrator ([voice.md](voice.md#library-voices)) |
+| `voice.name` | `nora`, `james`, `olivia`, `henry`, `priya`, `marcus`, `ethan`, `graham`, `claire` | — | Library narrator ([voice.md](voice.md#library-voices)) |
 | `voice.description` | text | | Described voice, e.g. "Calm, friendly narrator in her thirties" |
 | `voice.sample` | path | | Cloned voice: the speaker's recording (needs a consent record) |
 | `voice.style` | text | natural, relaxed | Delivery instruction for preset voices |
