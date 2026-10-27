@@ -31,6 +31,8 @@ def test_defaults_fill_in(tmp_path):
     ({"voice": {"type": "clone"}}, "voice.sample"),
     ({"talking_head": {"enabled": True, "character": "nobody"}}, "talking_head.character"),
     ({"disclosure": "sometimes"}, "disclosure"),
+    ({"captions": {"scale": 9}}, "captions.scale"),
+    ({"captions": {"scale": "big"}}, "captions.scale"),
     ({"surprise": 1}, "unknown key"),
 ])
 def test_validation_errors(tmp_path, bad, message):

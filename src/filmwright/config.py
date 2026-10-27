@@ -33,7 +33,7 @@ DEFAULTS: dict[str, Any] = {
     "talking_head": {"enabled": False, "character": "leo", "corner": "bottom-right"},
     "music": {"mood": "upbeat", "sync_to_scenes": True, "level": None},
     "sound_effects": "subtle",
-    "captions": {"burn_in": True},
+    "captions": {"burn_in": True, "scale": 1.0},    # scale 1.4 for a cut meant to be watched on a phone
     "outputs": ["4k", "hd"],
     "disclosure": "metadata",
     "checks": {"tool_names": "warn"},
@@ -77,6 +77,12 @@ def validate(cfg: dict) -> list[str]:
         _one_of(e, "talking_head.character", th.get("character"), CHARACTERS)
         _one_of(e, "talking_head.corner", th.get("corner"), CORNERS)
     _one_of(e, "music.mood", cfg["music"].get("mood"), MOODS)
+    try:
+        cs = float((cfg.get("captions") or {}).get("scale", 1) or 1)
+        if not 0.5 <= cs <= 3:
+            e.append(f"captions.scale: {cs} is out of range (0.5 to 3; 1.4 reads well on a phone)")
+    except (TypeError, ValueError):
+        e.append("captions.scale: must be a number (1 is the default, 1.4 reads well on a phone)")
     outs = cfg["outputs"]
     if not isinstance(outs, list) or not outs:
         e.append("outputs: a list such as [4k, hd]")
