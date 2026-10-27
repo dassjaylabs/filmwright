@@ -55,7 +55,8 @@ def remap(meta: dict[str, Any] | None, cuts: list[tuple[float, float]]) -> dict[
         return meta
     def shift(t: float) -> float:
         return t - sum(min(max(0.0, t - a), b - a) for a, b in cuts)
-    events = [{**e, "t": round(shift(e["t"]), 3), "end": round(shift(e["end"]), 3)} for e in meta["events"]]
+    events = [{**e, "t": round(shift(e["t"]), 3), "end": round(shift(e["end"]), 3),
+               **({"ready": round(shift(e["ready"]), 3)} if e.get("ready") is not None else {})} for e in meta["events"]]
     return {**meta, "events": events}
 
 
@@ -118,7 +119,8 @@ def auto_focus_specs(section: dict[str, Any], meta: dict[str, Any] | None, log: 
             ww, hh = min(w, 640.0), min(h, 200.0)
             z, box = min(zmax, 1.65), [x, y, ww, hh]
         weight = {"click": 3, "fill": 3, "type": 3, "select": 3, "check": 3, "press": 2, "hover": 1}[e["kind"]]
-        cands.append({"t": e["t"], "weight": weight, "nav": nav, "box": box, "zoom": round(z, 2), "kind": e["kind"], "step": e.get("step")})
+        cands.append({"t": e["t"], "weight": weight, "nav": nav, "box": box, "zoom": round(z, 2), "kind": e["kind"],
+                      "step": e.get("step"), "ready": e.get("ready")})
     # scrolls are actions too: when the page has scrolled to new content, push in on the content as it settles
     for e in allev:
         if e["kind"] == "eval" and e["t"] > 2.0 and e.get("step") not in skip and not e.get("box"):
@@ -137,7 +139,10 @@ def auto_focus_specs(section: dict[str, Any], meta: dict[str, Any] | None, log: 
     for c in chosen:
         lead = 1.6 if c["nav"] else 0.9               # land the zoom just before the action; a navigating click zooms out as it fires
         lead_c = 0.2 if c["kind"] == "scroll" else lead          # scroll: the zoom starts as the page settles
-        out.append({"box": c["box"], "at": round(max(0.0, c["t"] - lead_c), 2), "zoom": c["zoom"], "hold": 1.9 if c["nav"] else hold})
+        at = c["t"] - lead_c
+        if c.get("ready") is not None:                 # the page scrolled to the target: don't move in before it is there
+            at = max(at, c["ready"] + 0.25)            # plan_camera starts the ease 0.25 s before `at`
+        out.append({"box": c["box"], "at": round(max(0.0, at), 2), "zoom": c["zoom"], "hold": 1.9 if c["nav"] else hold})
     return out
 
 

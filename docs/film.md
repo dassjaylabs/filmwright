@@ -242,7 +242,9 @@ Go section by section, with the clip's `events.json` and your narration open:
 Every recorded clip gets `auto_focus: true` by default (in a series built with `filmwright.series.mkepisode` too): the camera picks the clip's real
 actions (clicks, hovers, typing, ticks, tab switches), eases in on each one, holds about 2.6 s, and eases back out.
 A navigating click zooms in just before it fires and out as it does. A wide card (too big to zoom on) is framed by
-its upper-left part, where the headline is. The host fades out of the way during every zoom.
+its upper-left part, where the headline is. The host fades out of the way during every zoom. A target below the fold is
+scrolled into view before its step, and the recording rests there for 1.2 s, so the zoom eases in over the page as
+it is when the action happens.
 
 Per section: `auto_focus: false` (none), `"add"` (automatic plus your own `focus:` entries), `auto_focus_max` (default 3),
 `auto_focus_zoom` (max, default 1.9), `auto_focus_hold`, `auto_focus_skip: [step numbers]`. For a moment the events do

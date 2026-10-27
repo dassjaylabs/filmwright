@@ -129,6 +129,7 @@ SHOT_STYLE = "#__fw_fx { visibility: hidden !important; }"
 VISIBLE = {"goto", "click", "hover", "fill", "type", "check", "uncheck", "select", "press", "upload"}
 POINTED = {"click", "hover", "fill", "type", "check", "uncheck", "select"}
 TARGETED = POINTED | {"wait_for", "expect_visible", "expect_text", "expect_count"}
+SCROLL_SETTLE = 1.2   # seconds the recording rests on a page that just scrolled, before the action (a zoom eases in here)
 
 API_JS = """
 async ({path, method, body, tokenJs}) => {
@@ -336,6 +337,25 @@ def glide(page: Page, loc: Locator, rec: dict[str, Any], timeout: int, ctx: dict
         page.wait_for_timeout(120)
 
 
+def bring_into_view(page: Page, step: dict[str, Any], ctx: dict[str, Any]) -> bool:
+    """Scroll a pointed step's target into view before the step starts; True when that moved it.
+
+    The click would scroll it anyway, but only after its box was logged, so a target below the fold was logged where it
+    was before the scroll and its zoom aimed at the old spot (or was dropped as off-screen). Scrolling first means the
+    box logged is where the action happens, and the recording shows the page there before the camera moves."""
+    (kind, arg), = [(k, v) for k, v in step.items() if k not in ("note", "save_as")]
+    if kind not in POINTED or not isinstance(arg, (dict, str)):
+        return False
+    try:
+        loc = locate(page, interpolate(arg, ctx["vars"]))
+        before = loc.bounding_box(timeout=1500)
+        loc.scroll_into_view_if_needed(timeout=1500)
+        after = loc.bounding_box(timeout=1500)
+    except Exception:
+        return False
+    return bool(before and after and (abs(before["x"] - after["x"]) > 1 or abs(before["y"] - after["y"]) > 1))
+
+
 def target_box(page: Page, step: dict[str, Any], ctx: dict[str, Any]) -> list[float] | None:
     (kind, arg), = [(k, v) for k, v in step.items() if k not in ("note", "save_as")]
     if kind not in TARGETED or not isinstance(arg, (dict, str)):
@@ -446,7 +466,7 @@ def main() -> int:
 
     with sync_playwright() as p:
         browser = p.chromium.launch(**launch_kwargs(headless=not args.headed, slow_mo=int(spec.get("slow_mo", 100)),
-                                                    args=launch_args(scale) if hq else []))
+                                                    args=launch_args(scale, vp) if hq else []))
         from filmwright.demo.recorder import chromium_path
         print(f"browser: {browser.version} ({'open-source Chromium' if chromium_path() else 'Chrome for Testing fallback'}), "
               f"{'recording at ' + recording['resolution'] if hq else 'no recording' if args.no_video else 'recording with Playwright'}", flush=True)
@@ -501,6 +521,10 @@ def main() -> int:
             try:
                 for i, step in enumerate(sc.get("steps", []), 1):
                     kind = next(k for k in step if k not in ("note", "save_as"))
+                    ready = None
+                    if kind in POINTED and bring_into_view(page, step, ctx) and recorder:
+                        ready = time.time()                     # the page is where the action will happen from here
+                        page.wait_for_timeout(SCROLL_SETTLE * 1000)
                     began = time.time()
                     box = target_box(page, step, ctx) if kind in POINTED else None
                     try:
@@ -515,7 +539,7 @@ def main() -> int:
                                    "evidence": ev if kind == "api" else None,
                                    "label": describe(interpolate(arg, ctx["vars"])) if kind in TARGETED else
                                    (str(interpolate(arg, ctx["vars"])) if kind in ("goto", "press") else ""),
-                                   "box": box})
+                                   "box": box, **({"ready": ready} if ready else {})})
                     if ev:
                         row["evidence"].append(ev)
                     if kind in VISIBLE and recording["pace"] > 0:
@@ -538,10 +562,13 @@ def main() -> int:
                 out = recorder.stop()
                 for e in events:
                     e["t"], e["end"] = recorder.rel(e["t"]), recorder.rel(e["end"])
+                    if e.get("ready"):
+                        e["ready"] = recorder.rel(e["ready"])
                 if out:
                     row["video"] = str(out.relative_to(root))
                     (videos / f"{sid}.events.json").write_text(json.dumps({
                         "viewport": vp, "scale": scale, "frame": [vp["width"] * scale, vp["height"] * scale],
+                        **({"captured": [list(d) for d in recorder.mismatched()]} if recorder.mismatched() else {}),
                         "events": events}, indent=1))
             video = page.video
             context.close()  # finalizes Playwright's webm, if that engine is in use

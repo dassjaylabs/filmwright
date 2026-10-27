@@ -7,6 +7,13 @@ is 4320×2430 at up to 60 fps. Each frame is held until the next one arrives, wh
 timing real-time, and the result is encoded at CRF 16. Event timestamps from the runner use the
 same clock (`time.time()`), so `t0` maps them onto the video.
 
+The browser window is launched at the viewport's size (`launch_args`). Without that, some headless Chromium
+builds (the open-source snapshot `filmwright setup` installs among them) capture the window's own content area
+instead of the emulated viewport until the page first navigates: 87 CSS px short at 1440×810, 500 px wide for a
+430 px phone viewport. The encoder stretches such a frame to the expected size, which would put every zoom and
+callout off its target. Each frame's metadata says what was captured; the recorder checks it and warns when it
+isn't the viewport.
+
 Resolutions are named by their output size; `scale_for()` picks the device scale factor that renders
 at least that many pixels, so the final film is downscaled (sharp), never upscaled.
 """
@@ -63,15 +70,20 @@ def scale_for(resolution: str, viewport_width: int) -> int:
     return max(1, min(4, math.ceil(out_w / max(1, viewport_width))))
 
 
-def launch_args(scale: int) -> list[str]:
-    return [f"--force-device-scale-factor={scale}", *CHROME_ARGS]
+def launch_args(scale: int, viewport: dict[str, int] | None = None) -> list[str]:
+    """Chromium flags for a recording browser. Pass the viewport: the window is then sized to it, so the screencast
+    captures exactly the viewport (see the module docstring)."""
+    size = [f"--window-size={int(viewport['width'])},{int(viewport['height'])}"] if viewport else []
+    return [f"--force-device-scale-factor={scale}", *size, *CHROME_ARGS]
 
 
 class Recorder:
     def __init__(self, context: Any, page: Any, out_mp4: Path, viewport: dict[str, int], scale: int,
                  fps: int = 30, quality: int = 92):
         self.context, self.page, self.out = context, page, Path(out_mp4)
-        self.size = (viewport["width"] * scale, viewport["height"] * scale)
+        self.viewport = (int(viewport["width"]), int(viewport["height"]))
+        self.size = (self.viewport[0] * scale, self.viewport[1] * scale)
+        self.captured: dict[tuple[int, int], int] = {}   # CSS size each frame says it shows -> number of frames
         self.fps, self.quality = fps, quality
         self.dir = Path(tempfile.mkdtemp(prefix="filmwright-frames-"))
         self.frames: list[tuple[float, Path]] = []
@@ -84,7 +96,11 @@ class Recorder:
             self.cdp.send("Page.screencastFrameAck", {"sessionId": params["sessionId"]})
         except Exception:
             pass
-        ts = float(params.get("metadata", {}).get("timestamp") or time.time())
+        meta = params.get("metadata") or {}
+        ts = float(meta.get("timestamp") or time.time())
+        if meta.get("deviceWidth") and meta.get("deviceHeight"):
+            dims = (round(float(meta["deviceWidth"])), round(float(meta["deviceHeight"])))
+            self.captured[dims] = self.captured.get(dims, 0) + 1
         if self.t0 is None:
             self.t0 = ts
         path = self.dir / f"f{len(self.frames):06d}.jpg"
@@ -113,8 +129,20 @@ class Recorder:
         """A time.time() value → seconds into the recording."""
         return round(wall - (self.t0 if self.t0 is not None else self.started_at), 3)
 
+    def mismatched(self) -> dict[tuple[int, int], int]:
+        """Frames whose captured area is not the viewport, by size. A zoom maps CSS px to frame px by the viewport, so
+        on these frames it would miss its target."""
+        return {d: n for d, n in self.captured.items()
+                if abs(d[0] - self.viewport[0]) > 1 or abs(d[1] - self.viewport[1]) > 1}
+
     def stop(self) -> Path | None:
         end = time.time()
+        bad = self.mismatched()
+        if bad:
+            sizes = ", ".join(f"{w}×{h} ({n} frames)" for (w, h), n in sorted(bad.items(), key=lambda kv: -kv[1]))
+            print(f"warning: {self.out.name}: the browser captured {sizes}, not the {self.viewport[0]}×{self.viewport[1]} "
+                  "viewport, so the picture is stretched and zooms and callouts miss their targets. Launch the browser "
+                  "with launch_args(scale, viewport) so its window matches the viewport.", flush=True)
         try:
             self.cdp.send("Page.stopScreencast")
         except Exception:
@@ -201,7 +229,7 @@ def record_html(html: Path, out_mp4: Path, seconds: float, resolution: str = "4k
     scale = max(1, min(4, math.ceil(out_w / max(1, vp["width"]))))
     out = None
     with sync_playwright() as p:
-        browser = p.chromium.launch(**launch_kwargs(args=launch_args(scale)))
+        browser = p.chromium.launch(**launch_kwargs(args=launch_args(scale, vp)))
         scene = with_fonts(Path(html))
         try:
             ctx = browser.new_context(viewport=vp)
