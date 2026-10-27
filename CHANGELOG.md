@@ -4,6 +4,11 @@
 
 First public release.
 
+- Demo recorder: zooms on a click below the fold land on the target. The target's box was logged before the click
+  scrolled it into view, so its zoom aimed at where it had been, or was dropped as off-screen. The runner now
+  scrolls the target into view first and rests on the page for a moment, and auto-focus never starts a zoom before
+  the page is there. The recording browser's window is also sized to the viewport, and each frame's captured size
+  is checked against it, with a warning when they differ.
 - `stems` output: the narration, music and sound effects as separate WAVs beside each film, aligned to it and at
   their levels in the mix, for finishing in another editor.
 - Read-back check works in every language: it compared only English letters and digits, so Japanese, Chinese,
