@@ -80,7 +80,7 @@ def cmd_build(a: argparse.Namespace) -> int:
     except C.ConfigError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
-    return build.run(cfg, only=a.only, skip_record=a.skip_record)
+    return build.run(cfg, only=a.only, skip_record=a.skip_record, allow_expired=a.allow_expired)
 
 
 def cmd_storyboard(a: argparse.Namespace) -> int:
@@ -198,6 +198,7 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("dir", nargs="?", default=".")
     b.add_argument("--only", help="demo: rerun only these scenarios (S01,S02); explainer: only these stories (1,3)")
     b.add_argument("--skip-record", action="store_true", help="demo/both: reuse existing recordings")
+    b.add_argument("--allow-expired", action="store_true", help="demo: record even if the saved session's token has expired")
 
     sb = sub.add_parser("storyboard", help="one panel per scene to approve before building (HTML + PDF)")
     sb.add_argument("dir", nargs="?", default=".")

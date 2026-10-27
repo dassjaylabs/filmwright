@@ -21,7 +21,11 @@ Try it on the bundled sample app first: `examples/demo-app/README.md`.
    `src/filmwright/templates/demo/scenarios.example.yaml`; every step is in docs/scenario-dsl.md. Cover the happy path,
    the edge cases the code handles, and one control case where the feature should show nothing.
 2. **Sign in** (if the app needs it): `python -m filmwright.demo.login --base-url <url> --run-dir .` opens a browser
-   window where you sign in yourself; the session is saved to `auth.json`.
+   window where you sign in yourself; the session is saved to `auth.json`. Sign in (or re-import) right before
+   recording: a saved access token lasts hours, and signing in somewhere else usually invalidates the refresh
+   token too. The runner reads the token's expiry and refuses an expired session instead of recording the app
+   signed out (`--allow-expired`, on the runner or `filmwright build`, overrides; `auth.token_js` tells it which key
+   holds the token).
 3. **Record:** `python -m filmwright.demo.run_scenarios scenarios.yaml` (add `--only S02,S03` to re-run some). Each
    scenario runs in a fresh, headless browser context. Look at a failure's screenshot and video before deciding
    whether the product or the scenario is wrong.
