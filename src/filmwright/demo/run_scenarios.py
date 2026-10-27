@@ -523,8 +523,8 @@ def main() -> int:
                     kind = next(k for k in step if k not in ("note", "save_as"))
                     ready = None
                     if kind in POINTED and bring_into_view(page, step, ctx) and recorder:
-                        ready = time.time()                     # the page is where the action will happen from here
-                        page.wait_for_timeout(SCROLL_SETTLE * 1000)
+                        ready = recorder.frame_after(page, time.time())   # the video shows the scrolled page from here
+                        page.wait_for_timeout(max(0.0, SCROLL_SETTLE - (time.time() - ready)) * 1000)
                     began = time.time()
                     box = target_box(page, step, ctx) if kind in POINTED else None
                     try:

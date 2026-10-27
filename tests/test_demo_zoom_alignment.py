@@ -49,6 +49,33 @@ def test_recorder_flags_frames_that_are_not_the_viewport(tmp_path):
         shutil.rmtree(rec.dir, ignore_errors=True)
 
 
+def test_ready_is_the_first_frame_that_shows_the_scroll(tmp_path):
+    class NoCdp:
+        def send(self, *a, **k):
+            return {}
+
+    rec = Recorder(None, None, tmp_path / "clip.mp4", {"width": 640, "height": 360}, 2)
+    rec.cdp = NoCdp()
+
+    class SlowPage:                         # the screencast delivers the scrolled frame a few waits later
+        waits = 0
+
+        def wait_for_timeout(self, ms):
+            self.waits += 1
+            if self.waits == 3:
+                _frame(rec, 640, 360, 105.08)
+                _frame(rec, 640, 360, 105.11)
+
+    try:
+        _frame(rec, 640, 360, 104.9)          # before the scroll
+        assert rec.frame_after(SlowPage(), since=105.0) == pytest.approx(105.08)
+        rec.stopped = True                     # as stop() leaves it: a frame still in flight is ignored
+        _frame(rec, 640, 360, 106.0)
+        assert len(rec.frames) == 3
+    finally:
+        shutil.rmtree(rec.dir, ignore_errors=True)
+
+
 def test_zoom_waits_for_the_page_to_scroll_to_the_target():
     meta = {"viewport": {"width": 1440, "height": 810}, "events": [
         {"step": 2, "kind": "click", "t": 6.0, "end": 6.4, "box": [300, 220, 200, 60], "ready": 5.6}]}

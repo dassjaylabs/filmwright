@@ -90,8 +90,11 @@ class Recorder:
         self.cdp: Any = None
         self.t0: float | None = None          # timestamp of the first frame (same clock as time.time())
         self.started_at = 0.0
+        self.stopped = False
 
     def _on_frame(self, params: dict[str, Any]) -> None:
+        if self.stopped:                      # a frame still in flight when the recording stopped
+            return
         try:
             self.cdp.send("Page.screencastFrameAck", {"sessionId": params["sessionId"]})
         except Exception:
@@ -125,6 +128,19 @@ class Recorder:
         except Exception:
             pass
 
+    def frame_after(self, page: Any, since: float, limit: float = 1.0) -> float:
+        """Wall time of the first frame captured after `since`, waiting up to `limit` s for it. The screencast trails
+        the page by a frame or more (longer on a busy machine), so this is when the video starts showing a change made
+        at `since`. Frames are delivered while Playwright waits, hence the short page waits."""
+        end = time.time() + limit
+        while True:
+            after = [ts for ts, _ in self.frames if ts > since]
+            if after:
+                return min(after)
+            if time.time() >= end:
+                return time.time()
+            page.wait_for_timeout(20)
+
     def rel(self, wall: float) -> float:
         """A time.time() value → seconds into the recording."""
         return round(wall - (self.t0 if self.t0 is not None else self.started_at), 3)
@@ -137,6 +153,7 @@ class Recorder:
 
     def stop(self) -> Path | None:
         end = time.time()
+        self.stopped = True
         bad = self.mismatched()
         if bad:
             sizes = ", ".join(f"{w}×{h} ({n} frames)" for (w, h), n in sorted(bad.items(), key=lambda kv: -kv[1]))
