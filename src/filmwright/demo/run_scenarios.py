@@ -415,12 +415,51 @@ def run_api(page: Page, arg: dict[str, Any], ctx: dict[str, Any]) -> str:
     return f'API {arg["path"].split("?")[0]}: ' + (", ".join(notes) if notes else f"HTTP {res['status']}")
 
 
+def session_minutes_left(state_path: Path, token_js: str | None = None) -> float | None:
+    """Minutes until the saved session's access token expires, from the `exp` claim of a JWT in the storage state;
+    None when there is no readable token. `token_js` (e.g. "localStorage.getItem('auth_token')") names the key;
+    without it every JWT counts except ones that call themselves refresh tokens.
+
+    A saved token outlives the import by hours at most, and a new sign-in elsewhere usually invalidates the refresh
+    token too, so a recording made with a stale session quietly shows the app signed out. Better to stop first."""
+    import base64
+    import re
+    import time
+    try:
+        d = json.loads(Path(state_path).read_text())
+    except (OSError, ValueError):
+        return None
+    want = None
+    if token_js:
+        m = re.search(r"""getItem\(\s*['"]([^'"]+)['"]\s*\)""", str(token_js))
+        want = m.group(1) if m else None
+    values = [str(kv.get("value", "")) for o in d.get("origins") or [] for kv in o.get("localStorage") or []
+              if want is None or kv.get("name") == want]
+    values += [str(c.get("value", "")) for c in d.get("cookies") or [] if want is None or c.get("name") == want]
+    exps = []
+    for v in values:
+        parts = v.split(".")
+        if len(parts) != 3:
+            continue
+        try:
+            claims = json.loads(base64.urlsafe_b64decode(parts[1] + "=" * (-len(parts[1]) % 4)))
+        except (ValueError, UnicodeDecodeError):
+            continue
+        if not isinstance(claims, dict) or not isinstance(claims.get("exp"), (int, float)):
+            continue
+        if want is None and str(claims.get("type", claims.get("typ", ""))).lower() == "refresh":
+            continue
+        exps.append(float(claims["exp"]))
+    return (min(exps) - time.time()) / 60 if exps else None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("scenarios")
     ap.add_argument("--only", help="comma-separated scenario ids")
     ap.add_argument("--headed", action="store_true")
     ap.add_argument("--no-video", action="store_true")
+    ap.add_argument("--allow-expired", action="store_true", help="record even if the saved session's token has expired")
     args = ap.parse_args()
 
     spec_path = Path(args.scenarios).expanduser().resolve()
@@ -434,6 +473,15 @@ def main() -> int:
     if state_path and not state_path.exists():
         print(f"No session at {state_path} — run login.py first.", file=sys.stderr)
         return 2
+    if state_path and not args.allow_expired:
+        left = session_minutes_left(state_path, auth.get("token_js"))
+        if left is not None and left <= 0:
+            print(f"The saved session in {state_path.name} expired {-left:.0f} min ago: the recording would show the app signed "
+                  "out. Sign in again and re-import it (python -m filmwright.demo.login, or import_chrome_session.sh), "
+                  "or pass --allow-expired.", file=sys.stderr)
+            return 2
+        if left is not None and left < 10:
+            print(f"warning: the saved session has {left:.0f} min left; re-import it if the recording takes longer", file=sys.stderr)
     vp = spec.get("viewport") or {"width": 1440, "height": 810}
     vp = {"width": int(vp["width"]) // 2 * 2, "height": int(vp["height"]) // 2 * 2}  # even, for H.264
     only = set(args.only.split(",")) if args.only else None

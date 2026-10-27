@@ -114,16 +114,17 @@ def _resolve_demo(reel: dict, root: Path) -> tuple[Path, Path]:
     return resolved, (out if out.is_absolute() else src.parent / out)
 
 
-def build_demo(reel: dict, root: Path, only: str | None, skip_record: bool) -> Path | None:
+def build_demo(reel: dict, root: Path, only: str | None, skip_record: bool, allow_expired: bool = False) -> Path | None:
     scen = root / reel["demo"]["scenarios"]
     if not skip_record:
         if not scen.is_file():
             raise C.ConfigError(f"{scen} not found (demo.scenarios in reel.yaml)")
         with _serve(root, reel["demo"].get("serve")):
-            args = [str(scen)] + (["--only", only] if only else [])
+            args = [str(scen)] + (["--only", only] if only else []) + (["--allow-expired"] if allow_expired else [])
             rc = _run("filmwright.demo.run_scenarios", *args, cwd=root)
         if rc:
-            print("Some scenarios failed (see results.md). Fix them, or build from what was recorded with --skip-record.")
+            print("Recording stopped: see the message above, or results.md for failed scenarios. Fix them, or build "
+                  "from what was recorded with --skip-record.")
             return None
     resolved, out_base = _resolve_demo(reel, root)
     if _run("filmwright.demo.build_video", str(resolved), cwd=root):
@@ -266,12 +267,12 @@ def finish(reel: dict, master: Path, already: list[Path], out_dir: Path, stem: s
     return made
 
 
-def run(reel: dict, only: str | None = None, skip_record: bool = False) -> int:
+def run(reel: dict, only: str | None = None, skip_record: bool = False, allow_expired: bool = False) -> int:
     root = Path(reel["_dir"])
     try:
         C.effective_voice_type(reel)                    # a cloned voice that can't run stops here, before any recording
         if reel["mode"] == "demo":
-            m = build_demo(reel, root, only, skip_record)
+            m = build_demo(reel, root, only, skip_record, allow_expired)
             films = [(m, [])] if m else []
         elif reel["mode"] == "explainer":
             films = build_explainer(reel, root, only)
