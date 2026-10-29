@@ -30,7 +30,7 @@ dependencies = [
 
 [project.optional-dependencies]
 # Neural voices on Apple Silicon (preset, described and cloned voices + read-back check).
-voice-mlx = ["mlx-audio>=0.5.7,<0.6; sys_platform == 'darwin' and platform_machine == 'arm64'"]
+voice-mlx = ["mlx-audio>=0.5.7,<0.7; sys_platform == 'darwin' and platform_machine == 'arm64'"]
 dev = ["pytest>=8", "ruff>=0.6"]
 all = ["filmwright[voice-mlx]"]
 
